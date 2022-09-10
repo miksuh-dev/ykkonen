@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  body,
+  #root {
+    @apply bg-gray-600 dark:bg-neutral-800 h-screen;
+  }
+
+  .btn-primary {
+    @apply px-6 py-4 text-xl font-semibold block text-center text-white transition duration-300 rounded-lg hover:from-custom-aqua-400 hover:to-custom-aqua-900 bg-gradient-to-br from-custom-aqua-800 to-custom-aqua-900 md:w-auto;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-4 text-xl font-semibold block text-center text-white transition duration-300 rounded-lg md:w-auto border border-custom-aqua-900 hover:bg-neutral-700;
+  }
+}
