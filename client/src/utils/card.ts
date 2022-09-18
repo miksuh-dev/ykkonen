@@ -1,5 +1,5 @@
-import { Card, CardImage } from "../../../server/src/type";
-import { CardType, CardColor, CardAction } from "../../../server/src/enum";
+import { Card, CardImage } from "../../../src/type";
+import { CardType, CardColor, CardAction } from "../../../src/enum";
 const Y_OFFSET = 7;
 const X_OFFSET = 7;
 const ROW_HEIGHT = 55;

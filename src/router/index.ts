@@ -1,9 +1,13 @@
-import { z } from "zod";
+// import { z } from "zod";
 import * as trpc from "@trpc/server";
+import { userRouter } from "./user";
 
 type Context = {};
+const createRouter = () => {
+  return trpc.router<Context>();
+};
 
-export const appRouter = trpc
+export const baseRouter = trpc
   .router<Context>()
   // .query("hello", {
   //   input: z
@@ -47,5 +51,9 @@ export const appRouter = trpc
       );
     },
   });
+
+export const appRouter = createRouter()
+  .merge("base", baseRouter)
+  .merge("user.", userRouter);
 
 export type AppRouter = typeof appRouter;

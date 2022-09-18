@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { Card, CardImage } from "../../../../server/src/type";
+import { Card, CardImage } from "../../../../src/type";
 
 const getClipPathString = (image: CardImage) => {
   const { height, width, x, y } = image;

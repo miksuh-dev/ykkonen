@@ -18,12 +18,7 @@ interface ActionCard extends BaseCard {
     | CardAction.PLUS_TWO
     | CardAction.REVERSE
     | CardAction.SWAP;
-  color:
-    | CardColor.RED
-    | CardColor.BLUE
-    | CardColor.GREEN
-    | CardColor.YELLOW
-    | CardColor.ANY;
+  color: CardColor.RED | CardColor.BLUE | CardColor.GREEN | CardColor.YELLOW;
 }
 
 interface WildCard extends BaseCard {

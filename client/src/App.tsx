@@ -3,14 +3,12 @@ import Card from "components/Card";
 import { generateCard } from "./utils/card";
 
 const App: Component = () => {
-  const card = {
-    color: 1,
-    number: 4,
+  const newCard = generateCard({
+    color: 4,
+    number: 1,
     type: 1,
-    // action: 4,
-  };
-
-  const newCard = generateCard(card);
+    // action: 2,
+  });
   console.log("newCard", newCard);
 
   return (
