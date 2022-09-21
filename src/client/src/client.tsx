@@ -2,9 +2,9 @@ import { createTRPCClient } from "@trpc/client";
 import { httpLink } from "@trpc/client/links/httpLink";
 import { splitLink } from "@trpc/client/links/splitLink";
 import { createWSClient, wsLink } from "@trpc/client/links/wsLink";
-import type { AppRouter } from "../../src/router";
+import type { AppRouter } from "../../server/src/router";
 
-export async function init() {
+export function init() {
   // http calls
   const wsClient = createWSClient({
     url: `ws://localhost:2022`,
@@ -38,7 +38,7 @@ export async function init() {
   // });
   // console.log("createPostResponse", createPostRes);
 
-  client.subscription("randomNumber", null, {
+  client.subscription("base.randomNumber", null, {
     onNext(data) {
       console.log("received", data);
     },

@@ -2,7 +2,8 @@
 import * as trpc from "@trpc/server";
 import { userRouter } from "./user";
 
-type Context = {};
+type Context = Record<string, unknown>;
+
 const createRouter = () => {
   return trpc.router<Context>();
 };
@@ -53,7 +54,7 @@ export const baseRouter = trpc
   });
 
 export const appRouter = createRouter()
-  .merge("base", baseRouter)
+  .merge("base.", baseRouter)
   .merge("user.", userRouter);
 
 export type AppRouter = typeof appRouter;

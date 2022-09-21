@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { Card, CardImage } from "../../../../src/type";
+import { Card, CardImage } from "../../../../type";
 
 const getClipPathString = (image: CardImage) => {
   const { height, width, x, y } = image;
@@ -15,6 +15,7 @@ const getClipPathString = (image: CardImage) => {
 const CardComponent: Component<{
   data: Card;
 }> = (props) => {
+  const { image } = props.data;
   return (
     <div
       class="relative overflow-hidden"
@@ -23,6 +24,7 @@ const CardComponent: Component<{
         width: `${props.data.image.width}px`,
       }}
     >
+      {image.x}
       <img
         class="fixed"
         style={{

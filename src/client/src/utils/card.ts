@@ -1,5 +1,6 @@
-import { Card, CardImage } from "../../../src/type";
-import { CardType, CardColor, CardAction } from "../../../src/enum";
+import { Card, CardImage } from "../../../type";
+import { CardType, CardColor, CardAction } from "../../../enum";
+
 const Y_OFFSET = 7;
 const X_OFFSET = 7;
 const ROW_HEIGHT = 55;
@@ -60,11 +61,12 @@ const getCardImageX = (card: Card) => {
       return X_OFFSET + COLUMN_WIDTH * 12;
     }
   }
+  throw new Error("Invalid card action");
 };
 
 const getCardImage = (card: Card): CardImage => {
   return {
-    path: "public/images/cards.png",
+    path: "/images/cards.png",
     x: getCardImageX(card),
     y: getCardImageY(card),
     height: 95,

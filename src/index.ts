@@ -4,6 +4,7 @@ import ws from "ws";
 import { appRouter, AppRouter } from "./router";
 
 // http server
+// eslint-disable-next-line @typescript-eslint/unbound-method
 const { server, listen } = createHTTPServer({
   router: appRouter,
   createContext() {
