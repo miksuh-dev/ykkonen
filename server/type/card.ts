@@ -2,7 +2,7 @@ import { CardColor, CardType, CardAction } from "../enum/card";
 
 interface BaseCard {
   type: CardType;
-  image: CardImage;
+  image?: CardImage;
 }
 
 interface NumberCard extends BaseCard {

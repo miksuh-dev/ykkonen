@@ -8,7 +8,8 @@ const App: Component = () => {
     number: 1,
     type: 1,
     // action: 2,
-  } as Card;
+  };
+
   const newCard = generateCard(card);
   console.log("newCard", newCard);
 

@@ -2,7 +2,7 @@ import { createTRPCClient } from "@trpc/client";
 import { httpLink } from "@trpc/client/links/httpLink";
 import { splitLink } from "@trpc/client/links/splitLink";
 import { createWSClient, wsLink } from "@trpc/client/links/wsLink";
-import type { AppRouter } from "../../server/src/router";
+import type { AppRouter } from "../../server/router";
 
 export function init() {
   // http calls

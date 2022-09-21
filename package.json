@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "dev": "NODE_PATH=./src nodemon ./src/index.ts",
-    "lint": "eslint .",
+    "dev": "NODE_PATH=./src nodemon server/index.ts",
+    "client": "npm run dev --prefix client",
+    "server": "npm run dev",
+    "lint": "eslint ./src",
     "build": "tsc",
     "start:prod": "NODE_PATH=./dist NODE_ENV=production node dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
