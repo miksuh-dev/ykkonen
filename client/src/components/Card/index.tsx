@@ -15,7 +15,6 @@ const getClipPathString = (image: CardImage) => {
 const CardComponent: Component<{
   data: Card;
 }> = (props) => {
-  const { image } = props.data;
   return (
     <div
       class="relative overflow-hidden"

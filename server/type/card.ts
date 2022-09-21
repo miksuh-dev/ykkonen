@@ -1,35 +1,31 @@
-import { CardColor, CardType, CardAction } from "../enum/card";
+import { CardColor, CardType, CardAction, CardNumber } from "../enum/card";
 
 interface BaseCard {
   type: CardType;
   image?: CardImage;
 }
 
-interface NumberCard extends BaseCard {
+export interface NumberCard extends BaseCard {
   type: CardType.NUMBER;
-  number: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-  color: CardColor.RED | CardColor.BLUE | CardColor.GREEN | CardColor.YELLOW;
+  number: CardNumber;
+  color: CardColor;
 }
 
-interface ActionCard extends BaseCard {
+export interface ActionCard extends BaseCard {
   type: CardType.ACTION;
-  action:
-    | CardAction.SKIP
-    | CardAction.PLUS_TWO
-    | CardAction.REVERSE
-    | CardAction.SWAP;
-  color: CardColor.RED | CardColor.BLUE | CardColor.GREEN | CardColor.YELLOW;
+  action: CardAction;
+  color: CardColor;
 }
 
-interface WildCard extends BaseCard {
+export interface WildCard extends BaseCard {
   type: CardType.WILD;
-  action: CardAction.PLUS_FOUR | CardAction.CHOOSE_COLOR;
-  color: CardColor.ANY;
+  action: CardAction;
+  color: CardColor.WILD;
 }
 
-interface SpinnerCard extends BaseCard {
+export interface SpinnerCard extends BaseCard {
   type: CardType.SPINNER;
-  action: CardAction.SPIN;
+  action: CardAction;
 }
 
 export interface CardImage {

@@ -12,7 +12,23 @@
     @apply px-6 py-4 text-xl font-semibold block text-center text-white transition duration-300 rounded-lg hover:from-custom-aqua-400 hover:to-custom-aqua-900 bg-gradient-to-br from-custom-aqua-800 to-custom-aqua-900 md:w-auto;
   }
 
+  .input-primary {
+    @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:border-custom-aqua-50 block w-full p-2.5 dark:bg-gray-700 dark:border-custom-aqua-900 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500;
+  }
+
+  .text-primary {
+    @apply font-medium text-custom-aqua-700 text-lg;
+  }
+
+  .btn-primary-full {
+    @apply btn-primary w-full;
+  }
+
   .btn-secondary {
     @apply px-6 py-4 text-xl font-semibold block text-center text-white transition duration-300 rounded-lg md:w-auto border border-custom-aqua-900 hover:bg-neutral-700;
+  }
+
+  .btn-secondary-full {
+    @apply btn-secondary w-full;
   }
 }
