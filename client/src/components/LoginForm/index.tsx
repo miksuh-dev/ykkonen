@@ -19,6 +19,16 @@ const LoginForm: Component = () => {
     password: "",
   });
 
+  trpcClient.subscription("base.randomNumber", null, {
+    onNext: (data) => {
+      console.log("data", data);
+    },
+    onError: (err) => {
+      console.log("err", err);
+    },
+    onDone: () => {},
+  });
+
   const handleLogin = async (data: typeof form) => {
     const submitData = data();
 

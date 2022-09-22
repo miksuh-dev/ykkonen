@@ -9,49 +9,50 @@ const createRouter = () => {
   return trpc.router<Context>();
 };
 
-export const baseRouter = trpc.router<Context>();
-// .query("hello", {
-//   input: z
-//     .object({
-//       name: z.string(),
-//     })
-//     .nullish(),
-//   resolve: ({ input }) => {
-//     console.log("input", input);
-//     return {
-//       text: `hello ${input?.name ?? "world"}`,
-//     };
-//   },
-// })
-// .mutation("createPost", {
-//   input: z.object({
-//     title: z.string(),
-//     text: z.string(),
-//   }),
-//   resolve({ input }) {
-//     // imagine db call here
-//     return {
-//       id: `${Math.random()}`,
-//       ...input,
-//     };
-//   },
-// })
-// .subscription("randomNumber", {
-//   resolve() {
-//     return new trpc.Subscription<{ randomNumber: number; another: string }>(
-//       (emit) => {
-//         // const timer = setInterval(() => {
-//         //   // emits a number every second
-//         emit.data({ randomNumber: Math.random(), another: "hello" });
-//         // }, 200);
-//
-//         return () => {
-//           // clearInterval(timer);
-//         };
-//       }
-//     );
-//   },
-// });
+export const baseRouter = trpc
+  .router<Context>()
+  // .query("hello", {
+  //   input: z
+  //     .object({
+  //       name: z.string(),
+  //     })
+  //     .nullish(),
+  //   resolve: ({ input }) => {
+  //     console.log("input", input);
+  //     return {
+  //       text: `hello ${input?.name ?? "world"}`,
+  //     };
+  //   },
+  // })
+  // .mutation("createPost", {
+  //   input: z.object({
+  //     title: z.string(),
+  //     text: z.string(),
+  //   }),
+  //   resolve({ input }) {
+  //     // imagine db call here
+  //     return {
+  //       id: `${Math.random()}`,
+  //       ...input,
+  //     };
+  //   },
+  // })
+  .subscription("randomNumber", {
+    resolve() {
+      return new trpc.Subscription<{ randomNumber: number; another: string }>(
+        (emit) => {
+          // const timer = setInterval(() => {
+          //   // emits a number every second
+          emit.data({ randomNumber: Math.random(), another: "hello" });
+          // }, 200);
+
+          return () => {
+            // clearInterval(timer);
+          };
+        }
+      );
+    },
+  });
 
 export const appRouter = createRouter()
   .merge("base.", baseRouter)
