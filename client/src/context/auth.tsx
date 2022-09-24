@@ -56,7 +56,7 @@ export const AuthProvider: Component<{
         batch(() => {
           setUser(res);
           setAuthenticated(true);
-          navigate("/lobby");
+          navigate("/lobby/list");
           setReady(true);
         });
       })

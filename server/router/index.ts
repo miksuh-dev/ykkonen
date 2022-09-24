@@ -1,5 +1,6 @@
 // import { z } from "zod";
 import * as trpc from "@trpc/server";
+// import { TRPCError } from "@trpc/server";
 import { Context } from "../context";
 import { lobbyRouter } from "./lobby";
 import { userRouter } from "./user";
@@ -55,6 +56,12 @@ export const baseRouter = createRouter();
 export const appRouter = createRouter()
   .merge("base.", baseRouter)
   .merge("user.", userRouter)
+  // .middleware(async ({ ctx, next }) => {
+  //   if (!ctx.user) {
+  //     throw new TRPCError({ code: "UNAUTHORIZED" });
+  //   }
+  //   return next();
+  // })
   .merge("lobby.", lobbyRouter);
 
 export type AppRouter = typeof appRouter;

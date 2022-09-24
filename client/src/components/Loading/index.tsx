@@ -1,8 +1,9 @@
 import type { Component } from "solid-js";
+import Center from "../Center";
 
 const Loading: Component = () => {
   return (
-    <div class="h-full flex justify-center items-center">
+    <Center>
       <svg
         class="inline mr-2 w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-custom-aqua-700"
         viewBox="0 0 100 101"
@@ -19,7 +20,7 @@ const Loading: Component = () => {
         />
       </svg>
       <span class="sr-only">Loading...</span>
-    </div>
+    </Center>
   );
 };
 

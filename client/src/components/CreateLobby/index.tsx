@@ -1,13 +1,33 @@
 import { createSignal } from "solid-js";
 import type { Component } from "solid-js";
-// import { trpcClient } from "client";
+import trpcClient from "trpc";
+import { useNavigate } from "@solidjs/router";
+
+type FormProps = {
+  name: string;
+};
 
 const CreateLobby: Component = () => {
-  const [name, setName] = createSignal<string>("");
+  const navigate = useNavigate();
+  const [form, setForm] = createSignal<FormProps>({
+    name: "",
+  });
 
-  const handleCreateLobby = async (name: string) => {
-    console.log("name", name);
-    // const res = await trpcClient.mutation("lobby.createLobby", { name });
+  const [error, setError] = createSignal<Partial<FormProps>>({
+    name: "",
+  });
+
+  const handleCreateLobby = async (data: typeof form) => {
+    const submitData = data();
+
+    if (!submitData.name) {
+      setError({
+        name: "Nimi on pakollinen",
+      });
+      return;
+    }
+    const res = await trpcClient.mutation("lobby.createLobby", submitData);
+    navigate(`/lobby/${res.id}`);
   };
 
   return (
@@ -24,15 +44,18 @@ const CreateLobby: Component = () => {
                 id="first_name"
                 class="input-primary"
                 required
-                value={name()}
-                onChange={(e) => setName(e.currentTarget.value)}
+                value={form().name}
+                onChange={(e) =>
+                  setForm({ ...form(), name: e.currentTarget.value })
+                }
               />
+              {error().name && <div class="text-red-500">{error().name}</div>}
             </div>
           </div>
           <div class="w-full">
             <button
               class="btn-primary-full"
-              onClick={() => handleCreateLobby(name())}
+              onClick={() => handleCreateLobby(form)}
             >
               Luo huone
             </button>

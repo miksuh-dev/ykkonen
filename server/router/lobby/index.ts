@@ -1,5 +1,6 @@
 import * as trpc from "@trpc/server";
 import { Context } from "context";
+import ee from "../../eventEmitter";
 import { createLobbySchema } from "./schema";
 
 interface Player {
@@ -21,55 +22,51 @@ interface Lobby {
   ownerId: number;
 }
 
-const lobbies: Record<string, Lobby> = {};
+const lobbies = new Map<string, Lobby>();
 
 export const lobbyRouter = trpc
   .router<Context>()
-  // .query("getUserById", {
-  //   input: z.string(),
-  //   resolve({ input }) {
-  //     return users[input]; // input type is string
-  //   },
-  // })
-  // .subscription("createLobby", {
-  //   input: z.object({
-  //     name: z.string().min(1),
-  //     ownerId: z.number().min(1),
-  //   }),
-  //   resolve({ input }) {
-  //     return new trpc.Subscription<{ lobby: Lobby }>((emit) => {
-  //       const id = Date.now().toString();
-  //       const lobby: Lobby = {
-  //         id,
-  //         name: input.name,
-  //         ownerId: input.ownerId,
-  //         players: [],
-  //         status: GameStatus.WAITING,
-  //       };
-  //       lobbies[lobby.id] = lobby;
-  //
-  //       emit.data({ lobby });
-  //       // const timer = setInterval(() => {
-  //       //   // emits a number every second
-  //       // }, 200);
-  //
-  //       return () => {
-  //         // clearInterval(timer);
-  //       };
-  //     });
-  //   },
+  .query("list", {
+    resolve() {
+      return [...lobbies.values()];
+    },
+  })
+  .subscription("list-update", {
+    resolve({ ctx }) {
+      console.log("ctx", ctx);
+
+      return new trpc.Subscription<{ lobby: Lobby }>((emit) => {
+        const onUpdate = (lobby: Lobby) => {
+          emit.data({ lobby });
+        };
+
+        ee.on("lobby.list-update", onUpdate);
+
+        return () => {
+          ee.off("lobby.list-update", onUpdate);
+        };
+      });
+    },
+  })
   .mutation("createLobby", {
     input: createLobbySchema,
-    resolve({ input }) {
+    resolve({ input, ctx }) {
       const id = Date.now().toString();
-      const lobby: Lobby = {
+
+      if (!ctx.user) {
+        throw new Error("Not authenticated");
+      }
+
+      const lobby = {
         id,
         name: input.name,
-        ownerId: input.ownerId,
+        ownerId: ctx.user.id,
         players: [],
         status: GameStatus.WAITING,
       };
-      lobbies[lobby.id] = lobby;
+      lobbies.set(lobby.id, lobby);
+
+      ee.emit("lobby.list-update", lobby);
 
       return lobby;
     },

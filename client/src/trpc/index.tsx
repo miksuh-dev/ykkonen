@@ -6,7 +6,7 @@ import env from "../config";
 
 import { createTRPCClient } from "@trpc/client";
 
-const wsClient = createWSClient({
+export const wsClient = createWSClient({
   url: env.WEBSOCKET_URL,
 });
 
