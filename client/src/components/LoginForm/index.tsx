@@ -1,7 +1,8 @@
 import { createSignal } from "solid-js";
-import { trpcClient } from "client";
+// import { trpcClient } from "client";
 import { Link } from "@solidjs/router";
 import type { Component } from "solid-js";
+import useAuth from "hooks/useAuth";
 
 type FormProps = {
   username: string;
@@ -9,6 +10,8 @@ type FormProps = {
 };
 
 const LoginForm: Component = () => {
+  const auth = useAuth();
+  //
   const [form, setForm] = createSignal<FormProps>({
     username: "",
     password: "",
@@ -19,34 +22,24 @@ const LoginForm: Component = () => {
     password: "",
   });
 
-  trpcClient.subscription("base.randomNumber", null, {
-    onNext: (data) => {
-      console.log("data", data);
-    },
-    onError: (err) => {
-      console.log("err", err);
-    },
-    onDone: () => {},
-  });
-
-  const handleLogin = async (data: typeof form) => {
+  const handleSubmit = async (data: typeof form) => {
     const submitData = data();
 
     if (!submitData.username || !submitData.password) {
       setError({
-        username: !submitData.username
-          ? "Käyttäjänimi on pakollinen"
-          : undefined,
-        password: !submitData.password ? "Salasana on pakollinen" : undefined,
+        username: "Please enter a username",
+        password: "Please enter a password",
       });
       return;
     }
 
-    const res = await trpcClient.mutation("user.login", {
-      username: submitData.username,
-      password: submitData.password,
-    });
-    console.log("res", res);
+    try {
+      await auth.action.login(submitData.username, submitData.password);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError({ username: err.message });
+      }
+    }
   };
 
   return (
@@ -92,7 +85,7 @@ const LoginForm: Component = () => {
             </div>
           </div>
           <div class="w-full space-y-4">
-            <button class="btn-primary-full" onClick={() => handleLogin(form)}>
+            <button class="btn-primary-full" onClick={() => handleSubmit(form)}>
               Kirjaudu sisään
             </button>
 

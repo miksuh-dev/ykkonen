@@ -97,7 +97,7 @@ export const generateCard = (data: Card): Card => {
 
   if (data.type === CardType.WILD) {
     return {
-      color: CardColor.ANY,
+      color: CardColor.WILD,
       action: data.action,
       type: CardType.WILD,
       image,

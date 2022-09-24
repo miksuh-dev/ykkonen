@@ -1,13 +1,13 @@
 import * as trpc from "@trpc/server";
-import { z } from "zod";
+// import { z } from "zod";
 
-interface User {
-  id: string;
-  name: string;
-  bio?: string;
-}
+// interface User {
+//   id: string;
+//   name: string;
+//   bio?: string;
+// }
 
-const users: Record<string, User> = {};
+// const users: Record<string, User> = {};
 
 export const gameRouter = trpc.router();
 // .query("createGame", {

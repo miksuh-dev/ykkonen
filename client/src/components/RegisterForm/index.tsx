@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
-import { trpcClient } from "client";
+import client from "trpc";
 import { Link } from "@solidjs/router";
+import useAuth from "hooks/useAuth";
 import type { Component } from "solid-js";
 
 type FormProps = {
@@ -10,6 +11,8 @@ type FormProps = {
 };
 
 const RegisterForm: Component = () => {
+  const auth = useAuth();
+
   const [form, setForm] = createSignal<FormProps>({
     username: "",
     password: "",
@@ -33,11 +36,13 @@ const RegisterForm: Component = () => {
       return;
     }
 
-    const res = await trpcClient.mutation("user.create", {
-      username: submitData.username,
-      password: submitData.password,
-    });
-    console.log("res", res);
+    try {
+      await auth.action.register(submitData.username, submitData.password);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError({ username: err.message });
+      }
+    }
   };
 
   return (
@@ -86,7 +91,7 @@ const RegisterForm: Component = () => {
                 Salasana uudelleen
               </label>
               <input
-                type="passwordAgain"
+                type="password"
                 id="username"
                 class="input-primary"
                 required

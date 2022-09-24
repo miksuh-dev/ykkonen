@@ -1,42 +1,36 @@
 import type { Component } from "solid-js";
+import { Show } from "solid-js/web";
 import { Routes, Route, Navigate } from "@solidjs/router";
+
+import Loading from "components/Loading";
 import Login from "view/Login";
 import Register from "view/Register";
-import Main from "view/Main";
-// import Card from "components/Card";
-// import { generateCard } from "./utils/card";
+import Lobby from "view/Lobby";
+
+import useAuth from "hooks/useAuth";
 
 const App: Component = () => {
-  // const card = {
-  //   color: 4,
-  //   number: 1,
-  //   type: 1,
-  //   // action: 2,
-  // };
-  //
-  // const newCard = generateCard(card);
-  // console.log("newCard", newCard);
+  const auth = useAuth();
 
   const getPath = () => {
-    //navigate is the result of calling useNavigate(); location is the result of calling useLocation().
-    //You can use those to dynamically determine a path to navigate to
+    if (auth.authenticated()) {
+      return "/lobby";
+    }
+
     return "/login";
   };
+
   return (
-    <>
+    <Show when={auth.ready()} fallback={<Loading />}>
       <Routes>
         <Route path="/">
           <Navigate href={getPath} />
         </Route>
-        <Route path="/" component={Main} />
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
-        <Route
-          path="/about"
-          element={<div>This site was made with Solid</div>}
-        />
+        <Route path="/lobby" component={Lobby} />
       </Routes>
-    </>
+    </Show>
   );
 };
 

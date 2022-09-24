@@ -1,5 +1,6 @@
 import * as trpc from "@trpc/server";
-import { z } from "zod";
+import { Context } from "context";
+import { createLobbySchema } from "./schema";
 
 interface Player {
   id: string;
@@ -23,7 +24,7 @@ interface Lobby {
 const lobbies: Record<string, Lobby> = {};
 
 export const lobbyRouter = trpc
-  .router()
+  .router<Context>()
   // .query("getUserById", {
   //   input: z.string(),
   //   resolve({ input }) {
@@ -58,11 +59,7 @@ export const lobbyRouter = trpc
   //     });
   //   },
   .mutation("createLobby", {
-    // validate input with Zod
-    input: z.object({
-      name: z.string().min(1),
-      ownerId: z.number().min(1),
-    }),
+    input: createLobbySchema,
     resolve({ input }) {
       const id = Date.now().toString();
       const lobby: Lobby = {
