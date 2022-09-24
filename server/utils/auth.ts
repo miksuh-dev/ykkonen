@@ -7,13 +7,10 @@ import prisma from "../prisma";
 export const getUserFromHeader = async (
   headers: IncomingMessage["headers"]
 ) => {
-  console.log("headers", headers);
   const authHeader = headers.authorization;
-  console.log("authHeader", authHeader);
   if (authHeader) {
     try {
       const token = authHeader.replace("Bearer ", "");
-      console.log("token", token);
 
       const user = await verifyJWTToken(token);
       return user;
@@ -52,7 +49,6 @@ export const createSession = (user: User) => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password, ...userData } = user;
-  console.log("userData", userData);
 
   const token = jwt.sign(userData, authSecret, {
     expiresIn: "15d",
