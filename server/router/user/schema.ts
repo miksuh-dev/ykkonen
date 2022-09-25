@@ -5,7 +5,7 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-export const createLoginSchema = z.object({
+export const createSchema = z.object({
   username: z.string().min(1),
   password: z.string().min(1),
   // .min(8, "Password must be at least 8 characters")

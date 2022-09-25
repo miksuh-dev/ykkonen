@@ -1,21 +1,17 @@
-import { httpLink } from "@trpc/client/links/httpLink";
+import { httpBatchLink } from "@trpc/client";
 import { splitLink } from "@trpc/client/links/splitLink";
+import { createTRPCProxyClient } from "@trpc/client";
 import { createWSClient, wsLink } from "@trpc/client/links/wsLink";
 import type { AppRouter } from "../../../server/router";
 import env from "../config";
 
-import { createTRPCClient } from "@trpc/client";
+// import { createTRPCProxyClient } from "@trpc/client";
 
 export const wsClient = createWSClient({
   url: env.WEBSOCKET_URL,
 });
 
-const trpcClient = createTRPCClient<AppRouter>({
-  headers() {
-    return {
-      Authorization: "Bearer " + localStorage.getItem("token"),
-    };
-  },
+const trpcClient = createTRPCProxyClient<AppRouter>({
   links: [
     splitLink({
       condition(op) {
@@ -24,8 +20,13 @@ const trpcClient = createTRPCClient<AppRouter>({
       true: wsLink({
         client: wsClient,
       }),
-      false: httpLink({
+      false: httpBatchLink({
         url: env.API_URL,
+        headers() {
+          return {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          };
+        },
       }),
     }),
   ],

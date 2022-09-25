@@ -15,7 +15,6 @@ export const createContext = async ({
   const user = await getUserFromHeader(req.headers);
 
   return {
-    headers: req.headers,
     user,
     req,
     res,

@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@solidjs/router": "^0.4.3",
-    "@trpc/client": "^9.27.2",
+    "@trpc/client": "^10.0.0-proxy-beta.7",
     "solid-js": "^1.5.1"
   }
 }

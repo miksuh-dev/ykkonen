@@ -1,39 +1,33 @@
 import { createSignal, onMount, onCleanup, For, Show } from "solid-js";
 import type { Component } from "solid-js";
 import trpcClient from "trpc";
-import { InferQueryOutput } from "trpc/types";
+import { Lobby } from "trpc/types";
 import useSnackbar from "hooks/useSnackbar";
-
-type Lobby = InferQueryOutput<"lobby.list">[number];
 
 const ListLobby: Component = () => {
   const [lobbies, setLobbies] = createSignal<Lobby[]>([]);
   const snackbar = useSnackbar();
 
   onMount(() => {
-    trpcClient.query("lobby.list").then((data) => {
+    trpcClient.lobby.list.query().then((data) => {
       setLobbies(data);
     });
 
-    const unsub = trpcClient.subscription("lobby.list-update", null, {
-      onNext(result) {
-        if (result.type === "data") {
-          const updatedLobby = result.data.lobby;
+    const listUpdate = trpcClient.lobby.onListUpdate.subscribe(undefined, {
+      onData(updatedLobby) {
+        setLobbies((prev) => {
+          if (prev.some((lobby) => lobby.id === updatedLobby.id)) {
+            return prev.map((lobby) => {
+              if (lobby.id === updatedLobby.id) {
+                return updatedLobby;
+              }
 
-          setLobbies((prev) => {
-            if (prev.some((lobby) => lobby.id === updatedLobby.id)) {
-              return prev.map((lobby) => {
-                if (lobby.id === updatedLobby.id) {
-                  return updatedLobby;
-                }
+              return lobby;
+            });
+          }
 
-                return lobby;
-              });
-            }
-
-            return [...prev, updatedLobby];
-          });
-        }
+          return [...prev, updatedLobby];
+        });
       },
       onError(err) {
         snackbar.error(err.message);
@@ -42,7 +36,7 @@ const ListLobby: Component = () => {
     });
 
     onCleanup(() => {
-      unsub();
+      listUpdate.unsubscribe();
     });
   });
 
@@ -56,7 +50,7 @@ const ListLobby: Component = () => {
       when={lobbies().length > 0}
       fallback={
         <div class="flex flex-col items-center text-white">
-          Ei avonaisia lobbyja
+          Ei aktiivisia huoneita
         </div>
       }
     >

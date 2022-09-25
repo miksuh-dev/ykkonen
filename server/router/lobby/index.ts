@@ -1,6 +1,7 @@
-import * as trpc from "@trpc/server";
-import { Context } from "context";
+import { observable } from "@trpc/server/observable";
 import ee from "../../eventEmitter";
+import { t } from "../../trpc";
+import { authedProcedure } from "../utils";
 import { createLobbySchema } from "./schema";
 
 interface Player {
@@ -24,38 +25,14 @@ interface Lobby {
 
 const lobbies = new Map<string, Lobby>();
 
-export const lobbyRouter = trpc
-  .router<Context>()
-  .query("list", {
-    resolve() {
-      return [...lobbies.values()];
-    },
-  })
-  .subscription("list-update", {
-    resolve({ ctx }) {
-      console.log("ctx", ctx);
-
-      return new trpc.Subscription<{ lobby: Lobby }>((emit) => {
-        const onUpdate = (lobby: Lobby) => {
-          emit.data({ lobby });
-        };
-
-        ee.on("lobby.list-update", onUpdate);
-
-        return () => {
-          ee.off("lobby.list-update", onUpdate);
-        };
-      });
-    },
-  })
-  .mutation("createLobby", {
-    input: createLobbySchema,
-    resolve({ input, ctx }) {
+export const lobbyRouter = t.router({
+  list: authedProcedure.query(() => {
+    return [...lobbies.values()];
+  }),
+  create: authedProcedure
+    .input(createLobbySchema)
+    .mutation(({ ctx, input }) => {
       const id = Date.now().toString();
-
-      if (!ctx.user) {
-        throw new Error("Not authenticated");
-      }
 
       const lobby = {
         id,
@@ -69,7 +46,22 @@ export const lobbyRouter = trpc
       ee.emit("lobby.list-update", lobby);
 
       return lobby;
-    },
-  });
+    }),
+  onListUpdate: t.procedure.subscription(() => {
+    return observable<Lobby>((emit) => {
+      const onUpdate = (lobby: Lobby) => {
+        // emit data to client
+        emit.next(lobby);
+      };
+
+      // trigger `onAdd()` when `add` is triggered in our event emitter
+      ee.on("updateLobby", onUpdate);
+      // unsubscribe function when client disconnects or stops subscribing
+      return () => {
+        ee.off("updateLobby", onUpdate);
+      };
+    });
+  }),
+});
 
 export type LobbyRouter = typeof lobbyRouter;

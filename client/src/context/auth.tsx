@@ -7,14 +7,12 @@ import {
   batch,
 } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import client from "trpc";
-import { InferQueryOutput } from "trpc/types";
+import trpcClient from "trpc";
+import { User } from "trpc/types";
 import type { Component } from "solid-js";
 
-type User = InferQueryOutput<"user.me"> | null;
-
 type AuthStoreProps = {
-  user: Accessor<User>;
+  user: Accessor<User | null>;
   authenticated: Accessor<boolean>;
   ready: Accessor<boolean>;
 };
@@ -46,12 +44,12 @@ export const AuthProvider: Component<{
   const navigate = useNavigate();
 
   const [authenticated, setAuthenticated] = createSignal<boolean>(false);
-  const [user, setUser] = createSignal<User>(null);
+  const [user, setUser] = createSignal<User | null>(null);
   const [ready, setReady] = createSignal<boolean>(false);
 
   const fetchAndSetMe = () => {
-    client
-      .query("user.me")
+    trpcClient.user.me
+      .query()
       .then((res) => {
         batch(() => {
           setUser(res);
@@ -68,7 +66,7 @@ export const AuthProvider: Component<{
 
   const login = async (username: string, password: string) => {
     try {
-      const res = await client.mutation("user.login", {
+      const res = await trpcClient.user.login.mutate({
         username,
         password,
       });
@@ -85,7 +83,7 @@ export const AuthProvider: Component<{
 
   const register = async (username: string, password: string) => {
     try {
-      const res = await client.mutation("user.create", {
+      const res = await trpcClient.user.register.mutate({
         username: username,
         password: password,
       });

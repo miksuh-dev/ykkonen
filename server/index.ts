@@ -61,6 +61,10 @@ server.listen(port, () => {
 });
 server.on("error", console.error);
 
+wss.on("connection", () => {
+  console.log(`Connection (${wss.clients.size})`);
+});
+
 process.on("SIGTERM", () => {
   wsHandler.broadcastReconnectNotification();
   wss.close();

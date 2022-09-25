@@ -8,17 +8,16 @@ export const getUserFromHeader = async (
   headers: IncomingMessage["headers"]
 ) => {
   const authHeader = headers.authorization;
-  if (authHeader) {
-    try {
-      const token = authHeader.replace("Bearer ", "");
+  if (!authHeader) return null;
 
-      const user = await verifyJWTToken(token);
-      return user;
-    } catch (err) {
-      return null;
-    }
+  try {
+    const token = authHeader.replace("Bearer ", "");
+
+    const user = await verifyJWTToken(token);
+    return user;
+  } catch (err) {
+    return null;
   }
-  return null;
 };
 
 export const verifyJWTToken = async (token: string) => {

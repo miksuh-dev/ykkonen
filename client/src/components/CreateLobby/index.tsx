@@ -26,7 +26,7 @@ const CreateLobby: Component = () => {
       });
       return;
     }
-    const res = await trpcClient.mutation("lobby.createLobby", submitData);
+    const res = await trpcClient.lobby.create.mutate(submitData);
     navigate(`/lobby/${res.id}`);
   };
 
