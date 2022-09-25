@@ -1,7 +1,8 @@
 import type { Component } from "solid-js";
 import { lazy } from "solid-js";
 import { Show } from "solid-js/web";
-import { Routes, Route, Navigate } from "@solidjs/router";
+import { Routes, Route, Navigate, useLocation } from "@solidjs/router";
+import useAuth from "hooks/useAuth";
 
 const Loading = lazy(() => import("components/Loading"));
 const Login = lazy(() => import("view/Login"));
@@ -9,15 +10,15 @@ const Login = lazy(() => import("view/Login"));
 const Register = lazy(() => import("view/Register"));
 const LobbyCreate = lazy(() => import("view/LobbyCreate"));
 const LobbyList = lazy(() => import("view/LobbyList"));
-
-import useAuth from "hooks/useAuth";
+const LobbyView = lazy(() => import("view/LobbyView"));
 
 const App: Component = () => {
   const auth = useAuth();
+  const location = useLocation();
 
   const getPath = () => {
     if (auth.authenticated()) {
-      return "/lobby/list";
+      return location.pathname;
     }
 
     return "/login";
@@ -39,6 +40,7 @@ const App: Component = () => {
           }
         >
           <Route path="/lobby">
+            <Route path=":id" component={LobbyView} />
             <Route path="list" component={LobbyList} />
             <Route path="create" component={LobbyCreate} />
           </Route>

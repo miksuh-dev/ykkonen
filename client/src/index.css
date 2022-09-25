@@ -5,7 +5,7 @@
 @layer components {
   body,
   #root {
-    @apply bg-gray-600 dark:bg-neutral-800 h-screen;
+    @apply bg-neutral-800 dark:bg-neutral-800 h-screen;
   }
 
   .btn-primary {

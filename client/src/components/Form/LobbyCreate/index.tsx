@@ -2,12 +2,13 @@ import { createSignal } from "solid-js";
 import type { Component } from "solid-js";
 import trpcClient from "trpc";
 import { useNavigate } from "@solidjs/router";
+import LobbyCreate from "./LobbyCreate";
 
 type FormProps = {
   name: string;
 };
 
-const CreateLobby: Component = () => {
+const LobbyCreateComponent: Component = () => {
   const navigate = useNavigate();
   const [form, setForm] = createSignal<FormProps>({
     name: "",
@@ -17,7 +18,7 @@ const CreateLobby: Component = () => {
     name: "",
   });
 
-  const handleCreateLobby = async (data: typeof form) => {
+  const handleSubmit = async (data: typeof form) => {
     const submitData = data();
 
     if (!submitData.name) {
@@ -27,44 +28,19 @@ const CreateLobby: Component = () => {
       return;
     }
     const res = await trpcClient.lobby.create.mutate(submitData);
-    navigate(`/lobby/${res.id}`);
+    console.log("res", res);
+    // navigate(`/lobby/${res.id}`);
+    navigate("/lobby/list"); //debug
   };
 
   return (
-    <div class="container flex mx-auto justify-center flex-col pt-16 pb-2 md:pb-4 px-2 md:px-0">
-      <div class="flex justify-center flex-col items-center">
-        <div class="block space-y-4">
-          <h1 class="text-4xl font-bold text-center text-white">
-            Luo uusi huone:
-          </h1>
-          <div>
-            <label for="first_name" class="block mb-2 text-primary">
-              Huoneen nimi
-            </label>
-            <input
-              type="text"
-              id="first_name"
-              class="input-primary"
-              required
-              value={form().name}
-              onChange={(e) =>
-                setForm({ ...form(), name: e.currentTarget.value })
-              }
-            />
-            {error().name && <div class="text-red-500">{error().name}</div>}
-          </div>
-          <div class="w-full">
-            <button
-              class="btn-primary-full"
-              onClick={() => handleCreateLobby(form)}
-            >
-              Luo huone
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <LobbyCreate
+      form={form}
+      error={error}
+      onChange={setForm}
+      onSubmit={handleSubmit}
+    />
   );
 };
 
-export default CreateLobby;
+export default LobbyCreateComponent;

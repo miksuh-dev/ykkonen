@@ -5,5 +5,5 @@ import type {
 } from "@trpc/server";
 import type { AppRouter } from "../../../server/router";
 
-export type Lobby = inferProcedureOutput<AppRouter["lobby"]["list"]>[number];
+export type Lobby = inferProcedureOutput<AppRouter["lobby"]["get"]>;
 export type User = inferProcedureOutput<AppRouter["user"]["me"]>;

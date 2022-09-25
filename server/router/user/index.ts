@@ -9,25 +9,8 @@ import { loginSchema, createSchema } from "./schema";
 export const userRouter = t.router({
   me: authedProcedure.query(({ ctx }) => {
     const { user } = ctx;
-    if (!user) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    // const user = await prisma.user.findUnique({
-    //   where: {
-    //     id: ctx.user.id,
-    //   },
-    // });
 
-    // if (!user) {
-    //   throw new TRPCError({
-    //     code: "NOT_FOUND",
-    //   });
-    // }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userDataWithoutPassword } = user;
-
-    return userDataWithoutPassword;
+    return user;
   }),
   login: t.procedure.input(loginSchema).mutation(async ({ input }) => {
     const user = await prisma.user.findUnique({
@@ -45,7 +28,10 @@ export const userRouter = t.router({
       throw new Error("Invalid username or password");
     }
 
-    const token = createSession(user);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...userDataWithoutPassword } = user;
+
+    const token = createSession(userDataWithoutPassword);
     return { token };
   }),
   register: t.procedure.input(createSchema).mutation(async ({ input }) => {

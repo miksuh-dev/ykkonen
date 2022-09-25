@@ -5,8 +5,6 @@ import { createWSClient, wsLink } from "@trpc/client/links/wsLink";
 import type { AppRouter } from "../../../server/router";
 import env from "../config";
 
-// import { createTRPCProxyClient } from "@trpc/client";
-
 export const wsClient = createWSClient({
   url: env.WEBSOCKET_URL,
 });

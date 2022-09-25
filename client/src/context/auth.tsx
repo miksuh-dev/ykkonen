@@ -6,7 +6,7 @@ import {
   Accessor,
   batch,
 } from "solid-js";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useLocation } from "@solidjs/router";
 import trpcClient from "trpc";
 import { User } from "trpc/types";
 import type { Component } from "solid-js";
@@ -42,10 +42,21 @@ export const AuthProvider: Component<{
   children: JSX.Element;
 }> = (props) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [authenticated, setAuthenticated] = createSignal<boolean>(false);
   const [user, setUser] = createSignal<User | null>(null);
   const [ready, setReady] = createSignal<boolean>(false);
+
+  const setAuthenticationCookie = (cookie: string) => {
+    document.cookie = "X-Authorization=" + cookie + "; path=/";
+    localStorage.setItem("token", cookie);
+  };
+
+  const clearAuthCookie = () => {
+    document.cookie = "";
+    localStorage.removeItem("token");
+  };
 
   const fetchAndSetMe = () => {
     trpcClient.user.me
@@ -54,8 +65,14 @@ export const AuthProvider: Component<{
         batch(() => {
           setUser(res);
           setAuthenticated(true);
-          navigate("/lobby/list");
           setReady(true);
+
+          if (
+            location.pathname === "/login" ||
+            location.pathname === "/register"
+          ) {
+            navigate("/lobby/list");
+          }
         });
       })
       .catch((e) => {
@@ -72,7 +89,7 @@ export const AuthProvider: Component<{
       });
 
       if (res.token) {
-        localStorage.setItem("token", res.token);
+        setAuthenticationCookie(res.token);
 
         fetchAndSetMe();
       }
@@ -89,7 +106,7 @@ export const AuthProvider: Component<{
       });
 
       if (res.token) {
-        localStorage.setItem("token", res.token);
+        setAuthenticationCookie(res.token);
 
         fetchAndSetMe();
       }
@@ -99,7 +116,8 @@ export const AuthProvider: Component<{
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    clearAuthCookie();
+
     setAuthenticated(false);
 
     navigate("/login");
@@ -111,6 +129,9 @@ export const AuthProvider: Component<{
     if (token && !user()) {
       fetchAndSetMe();
     } else {
+      if (location.pathname !== "/login") {
+        navigate("/login");
+      }
       setReady(true);
     }
   });

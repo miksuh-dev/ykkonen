@@ -1,17 +1,13 @@
 import type { Component } from "solid-js";
-import ListLobby from "components/Form/LobbyList";
-import Center from "components/Center";
+import LobbyList from "components/Form/LobbyList";
+import Content from "components/Content";
 
-const LobbyList: Component = () => {
+const LobbyListView: Component = () => {
   return (
-    <Center>
-      <div class="container flex mx-auto justify-center flex-col">
-        <div class="flex justify-center flex-col items-center">
-          <ListLobby />
-        </div>
-      </div>
-    </Center>
+    <Content title={"Huoneet:"}>
+      <LobbyList />
+    </Content>
   );
 };
 
-export default LobbyList;
+export default LobbyListView;
