@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcrypt";
-import prisma from "../../prisma";
 import { t } from "../../trpc";
 import { comparePassword, createSession } from "../../utils/auth";
 import { authedProcedure } from "../utils";
@@ -12,8 +11,8 @@ export const userRouter = t.router({
 
     return user;
   }),
-  login: t.procedure.input(loginSchema).mutation(async ({ input }) => {
-    const user = await prisma.user.findUnique({
+  login: t.procedure.input(loginSchema).mutation(async ({ ctx, input }) => {
+    const user = await ctx.prisma.user.findUnique({
       where: {
         username: input.username,
       },
@@ -34,10 +33,10 @@ export const userRouter = t.router({
     const token = createSession(userDataWithoutPassword);
     return { token };
   }),
-  register: t.procedure.input(createSchema).mutation(async ({ input }) => {
+  register: t.procedure.input(createSchema).mutation(async ({ ctx, input }) => {
     const { username, password } = input;
 
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await ctx.prisma.user.findUnique({
       where: {
         username,
       },
@@ -52,7 +51,7 @@ export const userRouter = t.router({
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
+    const user = await ctx.prisma.user.create({
       data: {
         username,
         password: hashedPassword,
