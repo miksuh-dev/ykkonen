@@ -1,9 +1,6 @@
-// import { /* createSignal, onMount, onCleanup, */ For, Show } from "solid-js";
 import type { Component } from "solid-js";
 import { Resource, Show, For } from "solid-js";
-// import trpcClient from "trpc";
 import { Lobby } from "trpc/types";
-// import useSnackbar from "hooks/useSnackbar";
 
 type Props = {
   lobby: Resource<Lobby>;
@@ -17,7 +14,7 @@ const LobbyPlayers: Component<Props> = (props) => {
         <div class="flex flex-col items-center text-white">Ei pelaajia</div>
       }
     >
-      <div class="overflow-x-auto shadow-md sm:rounded-lg">
+      <div class="overflow-x-auto">
         <div class="inline-block min-w-full align-middle">
           <div class="overflow-hidden ">
             <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">

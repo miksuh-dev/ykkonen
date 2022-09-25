@@ -6,6 +6,7 @@ import { Lobby } from "trpc/types";
 import trpcClient from "trpc";
 import useSnackbar from "hooks/useSnackbar";
 import Players from "./Players";
+import Chat from "./Chat";
 
 const LobbyViewComponent: Component = () => {
   const params = useParams();
@@ -57,12 +58,37 @@ const LobbyViewComponent: Component = () => {
     }
   };
 
+  const handleSendMessage = (content: string) => {
+    if (!params.id) {
+      throw new Error("Not implemented");
+    }
+
+    return trpcClient.lobby.message.mutate({
+      lobbyId: params.id,
+      content,
+    });
+  };
+
   return (
-    <div class="block space-y-4">
-      <Players lobby={lobby} />
-      <button class="btn-primary w-full" onClick={onLobbyLeave}>
-        Poistu
-      </button>
+    <div class="block space-y-4 w-full lg:w-[1000px]">
+      <div class="flex flex-row space-x-4">
+        <div class="flex-1 bg-white">
+          <Players lobby={lobby} />
+        </div>
+        <div class="flex-1 bg-white">
+          <Chat lobby={lobby} sendMessage={handleSendMessage} />
+        </div>
+      </div>
+      <div class="flex flex-row space-x-2">
+        <div class="flex-1">
+          <button class="btn-primary" onClick={onLobbyLeave}>
+            Poistu
+          </button>
+        </div>
+        <button class="btn-primary" onClick={onLobbyLeave}>
+          Aloita
+        </button>
+      </div>
     </div>
   );
 };

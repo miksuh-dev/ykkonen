@@ -9,6 +9,7 @@ import {
   getSchema,
   subscribeLobbySchema,
   leaveSchema,
+  messageSchema,
 } from "./schema";
 
 type Player = UserWithoutPassword;
@@ -19,12 +20,20 @@ enum GameStatus {
   ENDED,
 }
 
+interface Message {
+  id: string;
+  content: string;
+  username: string;
+  timestamp: number;
+}
+
 interface Lobby {
   id: string;
   name: string;
   players: Map<number, Player>;
   status: GameStatus;
   ownerId: number;
+  messages: Message[];
 }
 
 type LobbyFromClient = Omit<Lobby, "players"> & { players: Player[] };
@@ -57,6 +66,7 @@ export const lobbyRouter = t.router({
       ownerId: ctx.user.id,
       players: new Map<number, Player>(),
       status: GameStatus.WAITING,
+      messages: [],
     } as Lobby;
 
     lobbies.set(lobby.id, lobby);
@@ -103,7 +113,32 @@ export const lobbyRouter = t.router({
 
     return { id };
   }),
+  message: authedProcedure.input(messageSchema).mutation(({ ctx, input }) => {
+    const { lobbyId } = input;
+    const { user } = ctx;
 
+    const lobby = lobbies.get(lobbyId);
+    if (!lobby) {
+      throw new Error("Lobby not found");
+    }
+
+    if (!lobby.players.has(user.id)) {
+      lobby.players.set(user.id, user);
+    }
+
+    const message = {
+      id: Date.now().toString(),
+      username: user.username,
+      content: input.content,
+      timestamp: Date.now(),
+    };
+    lobby.messages.push(message);
+
+    ee.emit(`onUpdate-${lobby.id}`, lobby);
+    ee.emit("onListUpdate", lobby);
+
+    return { message };
+  }),
   onUpdate: authedProcedure
     .input(subscribeLobbySchema)
     .subscription(({ input, ctx }) => {
