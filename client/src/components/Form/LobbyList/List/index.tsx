@@ -52,7 +52,6 @@ const ListLobbyComponent: Component = () => {
 
   const handleJoinLobby = async (id: string) => {
     try {
-      console.log("id", id);
       const lobby = await trpcClient.lobby.join.mutate({ id });
       if (!lobby.id) {
         throw new Error("Failed");
