@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import LoginForm from "components/LoginForm";
+import LoginForm from "components/Form/Login";
 import Center from "components/Center";
 
 const Login: Component = () => {

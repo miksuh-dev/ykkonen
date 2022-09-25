@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import Login from "components/LoginForm";
+import Login from "components/Form/Login";
 
 const Main: Component = () => {
   return (

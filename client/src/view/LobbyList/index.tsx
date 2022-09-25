@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import ListLobby from "components/ListLobby";
+import ListLobby from "components/Form/LobbyList";
 import Center from "components/Center";
 
 const LobbyList: Component = () => {

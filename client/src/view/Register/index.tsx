@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import RegisterForm from "components/RegisterForm";
+import RegisterForm from "components/Form/Register";
 import Center from "components/Center";
 
 const Register: Component = () => {
