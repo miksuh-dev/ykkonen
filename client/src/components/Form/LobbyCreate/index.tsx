@@ -34,23 +34,24 @@ const CreateLobby: Component = () => {
     <div class="container flex mx-auto justify-center flex-col pt-16 pb-2 md:pb-4 px-2 md:px-0">
       <div class="flex justify-center flex-col items-center">
         <div class="block space-y-4">
-          <div class="flex">
-            <div>
-              <label for="first_name" class="block mb-2 text-primary">
-                Huoneen nimi
-              </label>
-              <input
-                type="text"
-                id="first_name"
-                class="input-primary"
-                required
-                value={form().name}
-                onChange={(e) =>
-                  setForm({ ...form(), name: e.currentTarget.value })
-                }
-              />
-              {error().name && <div class="text-red-500">{error().name}</div>}
-            </div>
+          <h1 class="text-4xl font-bold text-center text-white">
+            Luo uusi huone:
+          </h1>
+          <div>
+            <label for="first_name" class="block mb-2 text-primary">
+              Huoneen nimi
+            </label>
+            <input
+              type="text"
+              id="first_name"
+              class="input-primary"
+              required
+              value={form().name}
+              onChange={(e) =>
+                setForm({ ...form(), name: e.currentTarget.value })
+              }
+            />
+            {error().name && <div class="text-red-500">{error().name}</div>}
           </div>
           <div class="w-full">
             <button
