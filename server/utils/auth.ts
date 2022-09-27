@@ -1,5 +1,4 @@
 import { IncomingMessage } from "http";
-// import { User } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma";
@@ -27,35 +26,21 @@ const getTokenFromHeader = (headers: IncomingMessage["headers"]) => {
   return token;
 };
 
-const getTokenFromCookie = (headers: IncomingMessage["headers"]) => {
-  const cookie = headers.cookie;
-  if (!cookie) return null;
+export const getTokenFromUrl = (url: string) => {
+  const token = url.replace("/?token=", "");
+  if (!token) return null;
 
-  const cookies = cookie.split(",").reduce<Record<string, string>>((acc, c) => {
-    const [key, value] = c.split("=");
-
-    if (!key || !value) {
-      return acc;
-    }
-
-    return {
-      ...acc,
-      [key.trim()]: value.trim(),
-    };
-  }, {});
-
-  return cookies["X-Authorization"] ?? null;
+  return token;
 };
 
-export const getUserFromHeader = async (
-  headers: IncomingMessage["headers"]
+export const getUserFromRequest = async (
+  headers: IncomingMessage["headers"],
+  url: string
 ) => {
-  const authHeader = getTokenFromHeader(headers) ?? getTokenFromCookie(headers);
-  if (!authHeader) return null;
+  const token = getTokenFromHeader(headers) ?? getTokenFromUrl(url);
+  if (!token) return null;
 
   try {
-    const token = authHeader.replace("Bearer ", "");
-
     const user = await verifyJWTToken(token);
     return user;
   } catch (err) {

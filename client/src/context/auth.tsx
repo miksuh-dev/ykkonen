@@ -48,16 +48,6 @@ export const AuthProvider: Component<{
   const [user, setUser] = createSignal<User | null>(null);
   const [ready, setReady] = createSignal<boolean>(false);
 
-  const setAuthenticationCookie = (cookie: string) => {
-    document.cookie = "X-Authorization=" + cookie + "; path=/";
-    localStorage.setItem("token", cookie);
-  };
-
-  const clearAuthCookie = () => {
-    document.cookie = "";
-    localStorage.removeItem("token");
-  };
-
   const fetchAndSetMe = () => {
     trpcClient.user.me
       .query()
@@ -89,9 +79,10 @@ export const AuthProvider: Component<{
       });
 
       if (res.token) {
-        setAuthenticationCookie(res.token);
+        localStorage.setItem("token", res.token);
 
-        fetchAndSetMe();
+        const win: Window = window;
+        win.location.reload();
       }
     } catch (err) {
       throw err;
@@ -106,9 +97,10 @@ export const AuthProvider: Component<{
       });
 
       if (res.token) {
-        setAuthenticationCookie(res.token);
+        localStorage.setItem("token", res.token);
 
-        fetchAndSetMe();
+        const win: Window = window;
+        win.location.reload();
       }
     } catch (err) {
       throw err;
@@ -116,11 +108,11 @@ export const AuthProvider: Component<{
   };
 
   const logout = () => {
-    clearAuthCookie();
-
+    localStorage.removeItem("token");
     setAuthenticated(false);
 
-    navigate("/login");
+    const win: Window = window;
+    win.location.reload();
   };
 
   onMount(() => {

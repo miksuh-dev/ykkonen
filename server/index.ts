@@ -3,7 +3,6 @@ import * as trpcExpress from "@trpc/server/adapters/express";
 import { applyWSSHandler } from "@trpc/server/adapters/ws";
 import express from "express";
 import ws from "ws";
-// import prisma from "./prisma";
 import { createContext } from "./context";
 import { appRouter, AppRouter } from "./router";
 
@@ -16,8 +15,6 @@ const wsHandler = applyWSSHandler<AppRouter>({
   wss,
   router: appRouter,
   createContext,
-  //   return {};
-  // },
 });
 
 app.use((req, res, next) => {

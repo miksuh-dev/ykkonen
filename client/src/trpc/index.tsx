@@ -5,8 +5,19 @@ import { createWSClient, wsLink } from "@trpc/client/links/wsLink";
 import type { AppRouter } from "../../../server/router";
 import env from "../config";
 
+const getAuthToken = () => localStorage.getItem("token") || "";
+
+const getWsUrl = () => {
+  const token = getAuthToken();
+  if (!token) {
+    return `${env.WEBSOCKET_URL}`;
+  }
+
+  return `${env.WEBSOCKET_URL}?token=${token}`;
+};
+
 export const wsClient = createWSClient({
-  url: env.WEBSOCKET_URL,
+  url: getWsUrl(),
 });
 
 const trpcClient = createTRPCProxyClient<AppRouter>({
@@ -22,7 +33,7 @@ const trpcClient = createTRPCProxyClient<AppRouter>({
         url: env.API_URL,
         headers() {
           return {
-            Authorization: "Bearer " + localStorage.getItem("token"),
+            Authorization: "Bearer " + getAuthToken(),
           };
         },
       }),

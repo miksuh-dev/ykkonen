@@ -5,7 +5,7 @@ import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { NodeHTTPCreateContextFnOptions } from "@trpc/server/adapters/node-http";
 import ws from "ws";
 import prisma from "./prisma";
-import { getUserFromHeader } from "./utils/auth";
+import { getUserFromRequest } from "./utils/auth";
 
 export const createContext = async ({
   res,
@@ -13,7 +13,8 @@ export const createContext = async ({
 }:
   | CreateExpressContextOptions
   | NodeHTTPCreateContextFnOptions<IncomingMessage, ws>) => {
-  const user = await getUserFromHeader(req.headers);
+  const url = req.url ?? "";
+  const user = await getUserFromRequest(req.headers, url);
 
   return {
     user,
