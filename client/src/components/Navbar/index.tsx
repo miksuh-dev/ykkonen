@@ -1,17 +1,21 @@
 import type { Component } from "solid-js";
 import { createSignal, Show } from "solid-js";
+import { Link } from "@solidjs/router";
 import useAuth from "hooks/useAuth";
 
 const Navbar: Component = () => {
-  const [menuOpen, setMenuOpen] = createSignal(false);
   const auth = useAuth();
+  const [menuOpen, setMenuOpen] = createSignal(false);
 
   return (
     <nav class="absolute top-0 left-0 right-0 bg-neutral-900 border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900">
       <div class="container flex flex-wrap justify-between items-center mx-auto">
-        <span class="self-center text-xl font-semibold whitespace-nowrap text-white">
+        <Link
+          href="/"
+          class="self-center text-xl font-semibold whitespace-nowrap text-white"
+        >
           Ykkönen
-        </span>
+        </Link>
         <div class="flex items-center md:order-2">
           <button
             type="button"
