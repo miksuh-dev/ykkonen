@@ -7,6 +7,7 @@ const ListLobby: Component = () => {
     <div class="block space-y-4">
       <List />
       <div class="flex flex-row space-x-2">
+        <div class="flex-1" />
         <Link class="btn-primary" href="/lobby/create">
           Luo uusi
         </Link>
