@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { Resource, createSignal } from "solid-js";
+import { Resource, createSignal, createEffect, on } from "solid-js";
 import { Lobby } from "trpc/types";
 import useSnackbar from "hooks/useSnackbar";
 import Chat from "./Chat";
@@ -24,12 +24,27 @@ const LobbyChat: Component<Props> = (props) => {
     }
   };
 
+  let ref: HTMLDivElement | undefined = undefined;
+
+  createEffect(
+    on(
+      props.lobby,
+      (lobby) => {
+        if (lobby?.messages.length && ref) {
+          ref.scrollIntoView({ behavior: "smooth" });
+        }
+      },
+      { defer: true }
+    )
+  );
+
   return (
     <Chat
       lobby={props.lobby}
       message={message}
       onChange={setMessage}
       onSubmit={(data) => handleSubmit(data)}
+      ref={ref}
     />
   );
 };

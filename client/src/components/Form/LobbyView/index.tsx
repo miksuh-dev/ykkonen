@@ -58,15 +58,21 @@ const LobbyViewComponent: Component = () => {
     }
   };
 
-  const handleSendMessage = (content: string) => {
-    if (!params.id) {
-      throw new Error("Not implemented");
-    }
+  const handleSendMessage = async (content: string) => {
+    try {
+      if (!params.id) {
+        throw new Error("Not implemented");
+      }
 
-    return trpcClient.lobby.message.mutate({
-      lobbyId: params.id,
-      content,
-    });
+      await trpcClient.lobby.message.mutate({
+        lobbyId: params.id,
+        content,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log("e", e);
+      }
+    }
   };
 
   return (
