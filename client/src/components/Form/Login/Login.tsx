@@ -15,9 +15,19 @@ type Props = {
 };
 
 const Login: Component<Props> = (props) => (
-  <div class="block space-y-6">
+  <form
+    class="block space-y-6"
+    onSubmit={(e) => {
+      e.preventDefault();
+    }}
+  >
     <div class="space-y-4">
-      <div>
+      <div
+        onSubmit={(e) => {
+          e.preventDefault();
+          props.onSubmit(props.form);
+        }}
+      >
         <label for="first_name" class="block mb-2 text-primary">
           Käyttäjänimi:
         </label>
@@ -28,7 +38,10 @@ const Login: Component<Props> = (props) => (
           required
           value={props.form().username}
           onChange={(e) =>
-            props.onChange({ ...props.form(), username: e.currentTarget.value })
+            props.onChange({
+              ...props.form(),
+              username: e.currentTarget.value,
+            })
           }
         />
         {props.error().username && (
@@ -46,7 +59,10 @@ const Login: Component<Props> = (props) => (
           required
           value={props.form().password}
           onChange={(e) =>
-            props.onChange({ ...props.form(), password: e.currentTarget.value })
+            props.onChange({
+              ...props.form(),
+              password: e.currentTarget.value,
+            })
           }
         />
         {props.error().password && (
@@ -58,6 +74,7 @@ const Login: Component<Props> = (props) => (
       <button
         class="btn-primary-full"
         onClick={() => props.onSubmit(props.form)}
+        type="submit"
       >
         Kirjaudu sisään
       </button>
@@ -65,7 +82,7 @@ const Login: Component<Props> = (props) => (
         Luo tunnus
       </Link>
     </div>
-  </div>
+  </form>
 );
 
 export default Login;

@@ -16,7 +16,7 @@ type Props = {
 };
 
 const Register: Component<Props> = (props) => (
-  <div class="block space-y-6">
+  <form class="block space-y-6" onSubmit={(e) => e.preventDefault()}>
     <div class="flex flex-col space-y-4">
       <div>
         <label for="username" class="block mb-2 text-primary">
@@ -87,7 +87,7 @@ const Register: Component<Props> = (props) => (
         Takaisin
       </Link>
     </div>
-  </div>
+  </form>
 );
 
 export default Register;
