@@ -6,7 +6,6 @@ import {
   Accessor,
   batch,
 } from "solid-js";
-import { useNavigate, useLocation } from "@solidjs/router";
 import trpcClient from "trpc";
 import { User } from "trpc/types";
 import type { Component } from "solid-js";
@@ -41,9 +40,6 @@ export const AuthContext = createContext<AuthContextProps>(INITIAL_VALUE);
 export const AuthProvider: Component<{
   children: JSX.Element;
 }> = (props) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   const [authenticated, setAuthenticated] = createSignal<boolean>(false);
   const [user, setUser] = createSignal<User | null>(null);
   const [ready, setReady] = createSignal<boolean>(false);
@@ -56,13 +52,6 @@ export const AuthProvider: Component<{
           setUser(res);
           setAuthenticated(true);
           setReady(true);
-
-          if (
-            location.pathname === "/login" ||
-            location.pathname === "/register"
-          ) {
-            navigate("/lobby/list");
-          }
         });
       })
       .catch((e) => {
@@ -109,7 +98,6 @@ export const AuthProvider: Component<{
 
   const logout = () => {
     localStorage.removeItem("token");
-    setAuthenticated(false);
 
     const win: Window = window;
     win.location.reload();
@@ -121,9 +109,6 @@ export const AuthProvider: Component<{
     if (token && !user()) {
       fetchAndSetMe();
     } else {
-      if (location.pathname !== "/login") {
-        navigate("/login");
-      }
       setReady(true);
     }
   });
