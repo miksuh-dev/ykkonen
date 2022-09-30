@@ -11,7 +11,7 @@ type Props = {
   form: Accessor<FormProps>;
   onChange: Setter<FormProps>;
   error: Accessor<Partial<FormProps>>;
-  onSubmit: (data: Accessor<FormProps>) => void;
+  onSubmit: (data: FormProps) => void;
 };
 
 const Login: Component<Props> = (props) => (
@@ -25,7 +25,7 @@ const Login: Component<Props> = (props) => (
       <div
         onSubmit={(e) => {
           e.preventDefault();
-          props.onSubmit(props.form);
+          props.onSubmit(props.form());
         }}
       >
         <label for="first_name" class="block mb-2 text-primary">

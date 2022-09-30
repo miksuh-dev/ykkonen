@@ -10,7 +10,7 @@ type Props = {
   form: Accessor<FormProps>;
   onChange: Setter<FormProps>;
   error: Accessor<Partial<FormProps>>;
-  onSubmit: (data: Accessor<FormProps>) => void;
+  onSubmit: (data: FormProps) => void;
 };
 
 const CreateLobby: Component<Props> = (props) => (
@@ -36,7 +36,7 @@ const CreateLobby: Component<Props> = (props) => (
     <div class="w-full space-y-4">
       <button
         class="btn-primary-full"
-        onClick={() => props.onSubmit(props.form)}
+        onClick={() => props.onSubmit(props.form())}
       >
         Luo huone
       </button>
