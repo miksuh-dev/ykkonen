@@ -1,171 +1,254 @@
+import /* GameType, */ "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
+import { z } from "zod";
 import ee from "../../eventEmitter";
 import { t } from "../../trpc";
-import { UserWithoutPassword } from "../../type/prisma";
 import { authedProcedure } from "../utils";
-import {
-  createSchema,
-  joinSchema,
-  getSchema,
-  subscribeLobbySchema,
-  leaveSchema,
-  messageSchema,
-} from "./schema";
-
-type Player = UserWithoutPassword;
+import { getLobby, getLobbies } from "./query";
+import * as lobbyState from "./state";
+import { GameStateLobby } from "./state";
+import { IncomingMessage } from "./type";
 
 enum GameStatus {
-  WAITING,
-  STARTED,
-  ENDED,
+  WAITING = "waiting",
+  STARTED = "started",
+  ENDED = "ended",
 }
-
-interface Message {
-  id: string;
-  content: string;
-  username: string;
-  timestamp: number;
-}
-
-interface Lobby {
-  id: string;
-  name: string;
-  players: Map<number, Player>;
-  status: GameStatus;
-  ownerId: number;
-  messages: Message[];
-}
-
-type LobbyFromClient = Omit<Lobby, "players"> & { players: Player[] };
-
-const lobbies = new Map<string, Lobby>();
-
-const lobbyToClientLobby = (lobby: Lobby): LobbyFromClient => ({
-  ...lobby,
-  players: Array.from(lobby.players.values()),
-});
 
 export const lobbyRouter = t.router({
-  list: authedProcedure.query(() => {
-    return [...lobbies.values()].map(lobbyToClientLobby);
+  list: authedProcedure.query(async () => {
+    const lobbies = await getLobbies();
+
+    return lobbies.map((lobby) => lobbyState.extend(lobby, ["players"]));
   }),
-  get: authedProcedure.input(getSchema).query(({ input }) => {
-    const lobby = lobbies.get(input.id);
-    if (!lobby) {
-      throw new Error("Lobby not found");
-    }
-
-    return lobbyToClientLobby(lobby);
+  types: authedProcedure.query(async ({ ctx }) => {
+    const asd = await ctx.prisma.gameType.findMany({});
+    return asd;
   }),
-  create: authedProcedure.input(createSchema).mutation(({ ctx, input }) => {
-    const id = Date.now().toString();
+  get: authedProcedure
+    .input(
+      z.object({
+        id: z.number().min(0),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.user.id;
 
-    const lobby = {
-      id,
-      name: input.name,
-      ownerId: ctx.user.id,
-      players: new Map<number, Player>(),
-      status: GameStatus.WAITING,
-      messages: [],
-    } as Lobby;
+      if (!lobbyState.hasPlayer(input.id, userId)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not in this lobby",
+        });
+      }
 
-    lobbies.set(lobby.id, lobby);
+      const lobby = await getLobby(input.id);
 
-    ee.emit("onListUpdate", lobby);
+      return lobbyState.extend(lobby, ["players"]);
+    }),
+  create: authedProcedure
+    .input(
+      z.object({
+        name: z.string().min(1),
+        type: z.number().min(0),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const lobbyType = await ctx.prisma.gameType.findUnique({
+        where: {
+          id: input.type,
+        },
+      });
+      if (!lobbyType) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid game type",
+        });
+      }
 
-    return lobby;
-  }),
-  join: authedProcedure.input(joinSchema).mutation(({ ctx, input }) => {
-    const { id } = input;
-    const { user } = ctx;
+      const lobby = await ctx.prisma.lobby.create({
+        data: {
+          name: input.name,
+          ownerId: ctx.user.id,
+          status: GameStatus.WAITING,
+          gameTypeId: input.type,
+        },
+      });
 
-    const lobby = lobbies.get(id);
-    if (!lobby) {
-      throw new Error("Lobby not found");
-    }
+      ee.emit("onListUpdate", lobby);
 
-    if (!lobby.players.has(user.id)) {
-      lobby.players.set(user.id, user);
-    }
+      return lobby;
+    }),
+  join: authedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id } = input;
+      const { user } = ctx;
 
-    ee.emit(`onUpdate-${lobby.id}`, lobby);
-    ee.emit("onListUpdate", lobby);
+      const lobby = await ctx.prisma.lobby.findUnique({
+        where: {
+          id,
+        },
+      });
 
-    return { id };
-  }),
-  leave: authedProcedure.input(leaveSchema).mutation(({ ctx, input }) => {
-    const { id } = input;
-    const { user } = ctx;
+      if (!lobby) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invalid lobby",
+        });
+      }
 
-    const lobby = lobbies.get(id);
-    if (!lobby) {
-      throw new Error("Lobby not found");
-    }
+      if (!lobbyState.hasPlayer(lobby.id, user.id)) {
+        // throw new TRPCError({
+        //   code: "BAD_REQUEST",
+        //   message: "You are already in this lobby",
+        // });
+        lobbyState.addPlayer(lobby.id, user);
+      }
 
-    if (!lobby.players.has(user.id)) {
-      throw new Error("Not in lobby");
-    }
+      ee.emit(`onUpdate-${lobby.id}`, lobbyState.get(id));
+      ee.emit("onListUpdate", lobbyState.get(id, ["players"]));
 
-    lobby.players.delete(user.id);
+      return { id };
+    }),
+  leave: authedProcedure
+    .input(
+      z.object({
+        lobbyId: z.number().min(1),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      const { lobbyId } = input;
+      const { user } = ctx;
 
-    ee.emit(`onUpdate-${lobby.id}`, lobby);
-    ee.emit("onListUpdate", lobby);
+      if (!lobbyState.hasPlayer(lobbyId, user.id)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You are not in this lobby",
+        });
+      }
 
-    return { id };
-  }),
-  message: authedProcedure.input(messageSchema).mutation(({ ctx, input }) => {
-    const { lobbyId } = input;
-    const { user } = ctx;
+      const updatedLobby = lobbyState.removePlayer(lobbyId, user.id);
 
-    const lobby = lobbies.get(lobbyId);
-    if (!lobby) {
-      throw new Error("Lobby not found");
-    }
+      ee.emit(`onUpdate-${lobbyId}`, updatedLobby);
+      ee.emit("onListUpdate", updatedLobby);
 
-    if (!lobby.players.has(user.id)) {
-      lobby.players.set(user.id, user);
-    }
+      return { lobbyId };
+    }),
+  message: authedProcedure
+    .input(
+      z.object({
+        lobbyId: z.number().min(0),
+        content: z.string().min(1),
+      })
+    )
+    .mutation(({ ctx, input }) => {
+      const { lobbyId } = input;
+      const { user } = ctx;
 
-    const message = {
-      id: Date.now().toString(),
-      username: user.username,
-      content: input.content,
-      timestamp: Date.now(),
-    };
-    lobby.messages.push(message);
+      const lobby = lobbyState.get(lobbyId);
+      if (!lobby) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Lobby not found",
+        });
+      }
 
-    ee.emit(`onUpdate-${lobby.id}`, lobby);
-    ee.emit("onListUpdate", lobby);
+      if (!lobbyState.hasPlayer(lobbyId, user.id)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You are not in this lobby",
+        });
+      }
 
-    return { message };
-  }),
+      const message = lobbyState.addMessage(lobbyId, {
+        id: Date.now().toString(),
+        username: user.username,
+        content: input.content,
+        timestamp: Date.now(),
+      });
+
+      ee.emit(`onMessage-${input.lobbyId}`, message);
+
+      return { message };
+    }),
   onUpdate: authedProcedure
-    .input(subscribeLobbySchema)
+    .input(
+      z.object({
+        lobbyId: z.number().min(1),
+      })
+    )
     .subscription(({ input, ctx }) => {
       const { user } = ctx;
       //
-      const lobby = lobbies.get(input.id);
-      if (!lobby) {
-        throw new Error("Lobby not found");
-      }
-      if (!lobby.players.has(user.id)) {
-        throw new Error("Not in lobby");
+
+      if (!lobbyState.exists(input.lobbyId)) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Lobby not found",
+        });
       }
 
-      return observable<LobbyFromClient>((emit) => {
-        const onUpdate = (updatedLobby: Lobby) => {
-          emit.next(lobbyToClientLobby(updatedLobby));
+      if (!lobbyState.hasPlayer(input.lobbyId, user.id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not in lobby",
+        });
+      }
+
+      return observable<GameStateLobby>((emit) => {
+        const onUpdate = (updatedLobby: GameStateLobby) => {
+          emit.next(updatedLobby);
         };
 
-        ee.on(`onUpdate-${input.id}`, onUpdate);
+        ee.on(`onUpdate-${input.lobbyId}`, onUpdate);
         return () => {
-          ee.off(`onUpdate-${input.id}`, onUpdate);
+          ee.off(`onUpdate-${input.lobbyId}`, onUpdate);
+        };
+      });
+    }),
+  onMessage: authedProcedure
+    .input(
+      z.object({
+        lobbyId: z.number().min(1),
+      })
+    )
+    .subscription(({ input, ctx }) => {
+      const { user } = ctx;
+      //
+
+      if (!lobbyState.exists(input.lobbyId)) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Lobby not found",
+        });
+      }
+
+      if (!lobbyState.hasPlayer(input.lobbyId, user.id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Not in lobby",
+        });
+      }
+
+      return observable<IncomingMessage>((emit) => {
+        const onUpdate = (incomingMessage: IncomingMessage) => {
+          emit.next(incomingMessage);
+        };
+
+        ee.on(`onMessage-${input.lobbyId}`, onUpdate);
+        return () => {
+          ee.off(`onMessage-${input.lobbyId}`, onUpdate);
         };
       });
     }),
   onListUpdate: authedProcedure.subscription(() => {
-    return observable<Lobby>((emit) => {
-      const onUpdate = (lobby: Lobby) => {
+    return observable<GameStateLobby>((emit) => {
+      const onUpdate = (lobby: GameStateLobby) => {
         // emit data to client
         emit.next(lobby);
       };

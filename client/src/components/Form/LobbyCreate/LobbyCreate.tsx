@@ -1,15 +1,16 @@
 import { Link } from "@solidjs/router";
 import type { Component } from "solid-js";
+import { For } from "solid-js";
+import { LobbyType } from "trpc/types";
+import { Resource } from "solid-js";
 import { Accessor, Setter } from "solid-js";
-
-type FormProps = {
-  name: string;
-};
+import { FormProps, FormErrors } from "./index";
 
 type Props = {
   form: Accessor<FormProps>;
+  types: Resource<LobbyType[]>;
   onChange: Setter<FormProps>;
-  error: Accessor<Partial<FormProps>>;
+  error: Accessor<FormErrors>;
   onSubmit: (data: FormProps) => void;
 };
 
@@ -31,6 +32,32 @@ const CreateLobby: Component<Props> = (props) => (
       />
       {props.error().name && (
         <div class="text-red-500">{props.error().name}</div>
+      )}
+    </div>
+    <div>
+      <label for="type" class="block mb-2 text-primary">
+        Huoneen tyyppi
+      </label>
+      <select
+        id="type"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-aqua-500 focus:border-custom-aqua-500 block w-full p-2.5"
+        value={props.form().type}
+        onChange={(e) => {
+          props.onChange({
+            ...props.form(),
+            type: parseInt(e.currentTarget.value),
+          });
+        }}
+      >
+        <option selected value="0">
+          Valitse tyyppi
+        </option>
+        <For each={props.types()}>
+          {(type) => <option value={type.id}>{type.name}</option>}
+        </For>
+      </select>
+      {props.error().type && (
+        <div class="text-red-500">{props.error().type}</div>
       )}
     </div>
     <div class="w-full space-y-4">

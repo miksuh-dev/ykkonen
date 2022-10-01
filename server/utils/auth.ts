@@ -2,19 +2,6 @@ import { IncomingMessage } from "http";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma";
-import { UserWithoutPassword } from "../type/prisma";
-
-function exclude<User, Key extends keyof User>(
-  user: User,
-  ...keys: Key[]
-): Omit<User, Key> {
-  for (const key of keys) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-    delete user[key];
-  }
-
-  return user;
-}
 
 const getTokenFromHeader = (headers: IncomingMessage["headers"]) => {
   const authorization = headers.authorization;
@@ -55,9 +42,16 @@ export const verifyJWTToken = async (token: string) => {
   }
 
   try {
-    const data = jwt.verify(token, authSecret) as UserWithoutPassword;
+    const data = jwt.verify(token, authSecret) as {
+      id: number;
+      username: string;
+    };
 
     const user = await prisma.user.findFirst({
+      select: {
+        id: true,
+        username: true,
+      },
       where: {
         id: data.id,
       },
@@ -66,13 +60,13 @@ export const verifyJWTToken = async (token: string) => {
       throw new Error("User not found");
     }
 
-    return exclude(user, "password");
+    return user;
   } catch (err) {
     throw new Error("Invalid token");
   }
 };
 
-export const createSession = (userData: UserWithoutPassword) => {
+export const createSession = (userData: { id: number; username: string }) => {
   const authSecret = process.env.AUTH_TOKEN_SECRET;
   if (!authSecret) {
     throw new Error("No token data");

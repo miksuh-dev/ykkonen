@@ -1,8 +1,8 @@
 import type { Component } from "solid-js";
-import { createResource } from "solid-js";
+import { createResource, Show } from "solid-js";
 import { createEffect, onCleanup } from "solid-js";
 import { useParams, useNavigate } from "@solidjs/router";
-import { Lobby } from "trpc/types";
+import { LobbyInside } from "trpc/types";
 import trpcClient from "trpc";
 import useSnackbar from "hooks/useSnackbar";
 import Players from "./Players";
@@ -13,23 +13,32 @@ const LobbyViewComponent: Component = () => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
 
-  const [lobby, { mutate }] = createResource<Lobby>(() => {
-    if (!params.id) {
+  const [lobby, { mutate }] = createResource<LobbyInside>(() => {
+    if (params.id === undefined) {
       throw new Error("No id");
     }
-    return trpcClient.lobby.get.query({ id: params.id });
+    return trpcClient.lobby.get.query({ id: Number(params.id) });
   });
 
   createEffect(() => {
-    if (!params.id) {
+    const lobbyId = lobby()?.id;
+    if (!lobbyId) {
       return;
     }
 
     const lobbyUpdate = trpcClient.lobby.onUpdate.subscribe(
-      { id: params.id },
+      { lobbyId },
       {
         onData(updatedLobby) {
-          mutate(updatedLobby);
+          mutate((existingLobby) => {
+            if (!existingLobby) {
+              return existingLobby;
+            }
+            return {
+              ...existingLobby,
+              ...updatedLobby,
+            };
+          });
         },
         onError(err) {
           snackbar.error(err.message);
@@ -45,33 +54,18 @@ const LobbyViewComponent: Component = () => {
 
   const onLobbyLeave = async () => {
     try {
-      if (!params.id) {
-        throw new Error("Not implemented");
+      const lobbyId = lobby()?.id;
+      if (!lobbyId) {
+        return;
       }
-      await trpcClient.lobby.leave.mutate({ id: params.id });
+
+      await trpcClient.lobby.leave.mutate({ lobbyId });
     } catch (err) {
       if (err instanceof Error) {
         snackbar.error(err.message);
       }
     } finally {
       navigate("/lobby/list");
-    }
-  };
-
-  const handleSendMessage = async (content: string) => {
-    try {
-      if (!params.id) {
-        throw new Error("Not implemented");
-      }
-
-      await trpcClient.lobby.message.mutate({
-        lobbyId: params.id,
-        content,
-      });
-    } catch (e) {
-      if (e instanceof Error) {
-        console.log("e", e);
-      }
     }
   };
 
@@ -82,7 +76,9 @@ const LobbyViewComponent: Component = () => {
           <Players lobby={lobby} />
         </div>
         <div class="flex-1 bg-white">
-          <Chat lobby={lobby} sendMessage={handleSendMessage} />
+          <Show when={lobby()}>
+            <Chat lobby={lobby} />
+          </Show>
         </div>
       </div>
       <div class="flex flex-row space-x-2">

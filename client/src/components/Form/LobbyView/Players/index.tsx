@@ -1,15 +1,16 @@
 import type { Component } from "solid-js";
 import { Resource, Show, For } from "solid-js";
-import { Lobby } from "trpc/types";
+import { LobbyInside } from "trpc/types";
 
 type Props = {
-  lobby: Resource<Lobby>;
+  lobby: Resource<LobbyInside>;
 };
 
 const LobbyPlayers: Component<Props> = (props) => {
+  console.log("propps.lobby()", props.lobby());
   return (
     <Show
-      when={props.lobby()?.players.length}
+      when={props.lobby()?.players}
       fallback={
         <div class="flex flex-col items-center text-white">Ei pelaajia</div>
       }

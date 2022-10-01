@@ -73,7 +73,7 @@ const Login: Component<Props> = (props) => (
     <div class="w-full space-y-4">
       <button
         class="btn-primary-full"
-        onClick={() => props.onSubmit(props.form)}
+        onClick={() => props.onSubmit(props.form())}
         type="submit"
       >
         Kirjaudu sisään

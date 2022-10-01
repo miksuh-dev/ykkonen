@@ -1,10 +1,10 @@
 import { For, Show, Resource } from "solid-js";
 import type { Component } from "solid-js";
-import { Lobby } from "trpc/types";
+import { LobbyInList } from "trpc/types";
 
 type Props = {
-  lobbies: Resource<Lobby[]>;
-  onJoin: (id: string) => void;
+  lobbies: Resource<LobbyInList[]>;
+  onJoin: (id: number) => void;
 };
 
 const ListLobby: Component<Props> = (props) => (
@@ -38,6 +38,12 @@ const ListLobby: Component<Props> = (props) => (
                   scope="col"
                   class="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
                 >
+                  Tyyppi
+                </th>
+                <th
+                  scope="col"
+                  class="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                >
                   Tila
                 </th>
                 <th scope="col" class="p-4">
@@ -54,6 +60,9 @@ const ListLobby: Component<Props> = (props) => (
                     </td>
                     <td class="py-4 px-6 text-sm font-medium text-gray-500 whitespace-nowrap dark:text-white">
                       {lobby.players.length}
+                    </td>
+                    <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                      {lobby.gameType.name}
                     </td>
                     <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
                       {lobby.status}

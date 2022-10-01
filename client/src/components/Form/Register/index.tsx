@@ -3,7 +3,7 @@ import useAuth from "hooks/useAuth";
 import type { Component } from "solid-js";
 import Register from "./Register";
 
-type FormProps = {
+export type FormProps = {
   username: string;
   password: string;
   passwordAgain: string;
@@ -24,9 +24,7 @@ const RegisterComponent: Component = () => {
     passwordAgain: "",
   });
 
-  const handleSubmit = async (data: typeof form) => {
-    const submitData = data();
-
+  const handleSubmit = async (submitData: FormProps) => {
     if (submitData.password !== submitData.passwordAgain) {
       setError({
         password: "Passwords don't match",

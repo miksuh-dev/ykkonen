@@ -2,41 +2,56 @@ import { createSignal } from "solid-js";
 import type { Component } from "solid-js";
 import trpcClient from "trpc";
 import { useNavigate } from "@solidjs/router";
+import { Resource } from "solid-js";
 import LobbyCreate from "./LobbyCreate";
+import { LobbyType } from "trpc/types";
 
-type FormProps = {
+export type FormProps = {
   name: string;
+  type: number;
 };
 
-const LobbyCreateComponent: Component = () => {
+export type FormErrors = Partial<Omit<FormProps, "type"> & { type?: string }>;
+
+const LobbyCreateComponent: Component<{
+  types: Resource<LobbyType[]>;
+}> = (props) => {
   const navigate = useNavigate();
+
   const [form, setForm] = createSignal<FormProps>({
     name: "",
+    type: 0,
   });
 
-  const [error, setError] = createSignal<Partial<FormProps>>({
+  const [error, setError] = createSignal<FormErrors>({
     name: "",
+    type: "",
   });
 
-  const handleSubmit = async (data: typeof form) => {
-    const submitData = data();
-
+  const handleSubmit = (submitData: FormProps) => {
     if (!submitData.name) {
       setError({
         name: "Nimi on pakollinen",
       });
       return;
     }
-    const res = await trpcClient.lobby.create.mutate(submitData);
-    console.log("res", res);
-    // navigate(`/lobby/${res.id}`);
-    navigate("/lobby/list"); //debug
+    if (!submitData.type) {
+      setError({
+        type: "Tyyppi on pakollinen",
+      });
+      return;
+    }
+
+    trpcClient.lobby.create.mutate(submitData).then(() => {
+      navigate("/lobby/list"); //debug
+    });
   };
 
   return (
     <LobbyCreate
       form={form}
       error={error}
+      types={props.types}
       onChange={setForm}
       onSubmit={handleSubmit}
     />

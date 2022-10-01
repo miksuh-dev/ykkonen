@@ -36,12 +36,12 @@ const App: Component = () => {
           }
         >
           <Route path="/lobby">
-            <Route path=":id" component={LobbyView} />
             <Route path="list" component={LobbyList} />
             <Route path="create" component={LobbyCreate} />
+            <Route path=":id" component={LobbyView} />
           </Route>
         </Show>
-        <Route path="*" element={<Navigate href={getPath} />} />
+        // <Route path="*" element={<Navigate href={getPath} />} />
       </Routes>
     </Show>
   );

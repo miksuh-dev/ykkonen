@@ -1,7 +1,7 @@
 import { onMount, onCleanup, createResource } from "solid-js";
 import type { Component } from "solid-js";
 import trpcClient from "trpc";
-import { Lobby } from "trpc/types";
+import { LobbyInList } from "trpc/types";
 import useSnackbar from "hooks/useSnackbar";
 import { useNavigate } from "@solidjs/router";
 import ListLobby from "./List";
@@ -10,7 +10,7 @@ const ListLobbyComponent: Component = () => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
 
-  const [lobbies, { mutate }] = createResource<Lobby[]>(
+  const [lobbies, { mutate }] = createResource<LobbyInList[]>(
     () => trpcClient.lobby.list.query(),
     {
       initialValue: [],
@@ -22,26 +22,20 @@ const ListLobbyComponent: Component = () => {
       onData(updatedLobby) {
         mutate((prev) => {
           if (!prev) {
-            return [updatedLobby];
-          }
-
-          const exists = prev.some((lobby) => lobby.id === updatedLobby.id);
-          if (!exists) {
-            return [...prev, updatedLobby];
+            return prev;
           }
 
           return prev.map((lobby) => {
             if (lobby.id === updatedLobby.id) {
-              return updatedLobby;
+              return { ...lobby, ...updatedLobby };
             }
-
             return lobby;
           });
         });
       },
       onError(err) {
-        snackbar.error(err.message);
         console.error("error", err);
+        snackbar.error(err.message);
       },
     });
 
@@ -50,14 +44,11 @@ const ListLobbyComponent: Component = () => {
     });
   });
 
-  const handleJoinLobby = async (id: string) => {
+  const handleJoinLobby = async (id: number) => {
     try {
-      const lobby = await trpcClient.lobby.join.mutate({ id });
-      if (!lobby.id) {
-        throw new Error("Failed");
-      }
-
-      navigate(`/lobby/${lobby.id}`);
+      trpcClient.lobby.join.mutate({ id }).then((res) => {
+        navigate(`/lobby/${res.id}`);
+      });
     } catch (err) {
       if (err instanceof Error) {
         snackbar.error(err.message);

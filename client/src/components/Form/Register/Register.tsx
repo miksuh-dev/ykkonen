@@ -1,12 +1,7 @@
 import { Accessor, Setter } from "solid-js";
 import { Link } from "@solidjs/router";
 import type { Component } from "solid-js";
-
-type FormProps = {
-  username: string;
-  password: string;
-  passwordAgain: string;
-};
+import { FormProps } from "./index";
 
 type Props = {
   form: Accessor<FormProps>;
