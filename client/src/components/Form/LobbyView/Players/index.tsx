@@ -7,7 +7,6 @@ type Props = {
 };
 
 const LobbyPlayers: Component<Props> = (props) => {
-  console.log("propps.lobby()", props.lobby());
   return (
     <Show
       when={props.lobby()?.players}

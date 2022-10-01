@@ -41,7 +41,7 @@ const App: Component = () => {
             <Route path=":id" component={LobbyView} />
           </Route>
         </Show>
-        // <Route path="*" element={<Navigate href={getPath} />} />
+        <Route path="*" element={<Navigate href={getPath} />} />
       </Routes>
     </Show>
   );

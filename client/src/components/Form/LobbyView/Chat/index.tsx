@@ -17,10 +17,8 @@ const LobbyChat: Component<Props> = (props) => {
   createEffect(() => {
     const lobbyId = props.lobby()?.id;
     if (!lobbyId) {
-      console.log("no lobby id");
       return;
     }
-    console.log("subscribed");
 
     const lobbyUpdate = trpcClient.lobby.onMessage.subscribe(
       { lobbyId },
