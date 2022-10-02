@@ -1,15 +1,14 @@
 import { Link } from "@solidjs/router";
 import type { Component } from "solid-js";
 import { For } from "solid-js";
-import { LobbyType } from "trpc/types";
-import { Resource } from "solid-js";
 import { Accessor, Setter } from "solid-js";
 import { LobbyCreateInput } from "trpc/types";
 import { FormErrors } from "./index";
+import { RouteData } from "./index";
 
 type Props = {
   form: Accessor<LobbyCreateInput>;
-  types: Resource<LobbyType[]>;
+  types: RouteData[0];
   onChange: Setter<LobbyCreateInput>;
   error: Accessor<FormErrors>;
   onSubmit: (data: LobbyCreateInput) => void;

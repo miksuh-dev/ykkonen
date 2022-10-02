@@ -7,8 +7,7 @@ import { t } from "../../trpc";
 import { authedProcedure } from "../utils";
 import { getLobby, getLobbies } from "./query";
 import * as lobbyState from "./state";
-import { GameStateLobby } from "./state";
-import { IncomingMessage } from "./type";
+import { GameStateLobby, Message } from "./state";
 
 enum GameStatus {
   WAITING = "waiting",
@@ -101,16 +100,16 @@ export const lobbyRouter = t.router({
   join: authedProcedure
     .input(
       z.object({
-        id: z.number(),
+        lobbyId: z.number(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id } = input;
+      const { lobbyId } = input;
       const { user } = ctx;
 
       const lobby = await ctx.prisma.lobby.findUnique({
         where: {
-          id,
+          id: lobbyId,
         },
       });
 
@@ -129,10 +128,10 @@ export const lobbyRouter = t.router({
         lobbyState.addPlayer(lobby.id, user);
       }
 
-      ee.emit(`onUpdate-${lobby.id}`, lobbyState.get(id));
-      ee.emit("onListUpdate", lobbyState.get(id, ["players"]));
+      ee.emit(`onUpdate-${lobby.id}`, lobbyState.get(lobbyId));
+      ee.emit("onListUpdate", lobbyState.get(lobbyId, ["players"]));
 
-      return { id };
+      return { lobbyId };
     }),
   leave: authedProcedure
     .input(
@@ -184,17 +183,13 @@ export const lobbyRouter = t.router({
         });
       }
 
-      const messageBody = lobbyState.addMessage(lobbyId, {
+      const message = lobbyState.addMessage(lobbyId, {
         id: Date.now().toString(),
         username: user.username,
         content: input.content,
         timestamp: Date.now(),
+        lobbyId,
       });
-
-      const message = {
-        lobbyId: input.lobbyId,
-        message: messageBody,
-      };
 
       ee.emit(`onMessage-${input.lobbyId}`, message);
 
@@ -232,8 +227,8 @@ export const lobbyRouter = t.router({
       })
     )
     .subscription(({ input, ctx }) => {
-      return observable<IncomingMessage>((emit) => {
-        const onUpdate = (incomingMessage: IncomingMessage) => {
+      return observable<Message>((emit) => {
+        const onUpdate = (incomingMessage: Message) => {
           const userId = ctx.user.id;
 
           if (!lobbyState.hasPlayer(incomingMessage.lobbyId, userId)) {

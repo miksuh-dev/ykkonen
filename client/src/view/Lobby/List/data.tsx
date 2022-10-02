@@ -1,16 +1,46 @@
 import { LobbyInList } from "trpc/types";
-import { createResource } from "solid-js";
+import { createResource, onCleanup, onMount } from "solid-js";
 import trpcClient from "trpc";
+import useSnackbar from "hooks/useSnackbar";
 
 function LobbyData() {
-  const resource = createResource<LobbyInList[]>(
+  const snackbar = useSnackbar();
+
+  const [lobbyList, { mutate }] = createResource<LobbyInList[]>(
     () => trpcClient.lobby.list.query(),
     {
       initialValue: [],
     }
   );
 
-  return resource;
+  onMount(() => {
+    const listUpdate = trpcClient.lobby.onListUpdate.subscribe(undefined, {
+      onData(updatedLobby) {
+        mutate((prev) => {
+          if (!prev) {
+            return prev;
+          }
+
+          return prev.map((lobby) => {
+            if (lobby.id === updatedLobby.id) {
+              return { ...lobby, ...updatedLobby };
+            }
+            return lobby;
+          });
+        });
+      },
+      onError(err) {
+        console.error("error", err);
+        snackbar.error(err.message);
+      },
+    });
+
+    onCleanup(() => {
+      listUpdate.unsubscribe();
+    });
+  });
+
+  return { lobbyList };
 }
 
 export default LobbyData;

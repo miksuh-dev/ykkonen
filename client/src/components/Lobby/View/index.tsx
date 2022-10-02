@@ -1,7 +1,5 @@
-import type { Component } from "solid-js";
-import { Show } from "solid-js";
-import { createEffect, onCleanup } from "solid-js";
-import { useNavigate, useRouteData } from "@solidjs/router";
+import { Component } from "solid-js";
+import { useParams, useRouteData } from "@solidjs/router";
 import trpcClient from "trpc";
 import useSnackbar from "hooks/useSnackbar";
 import Players from "./Players";
@@ -12,48 +10,12 @@ export type RouteData = ReturnType<typeof data>;
 
 const LobbyViewComponent: Component = () => {
   const snackbar = useSnackbar();
-  const navigate = useNavigate();
-  const [lobby, { mutate }] = useRouteData<RouteData>();
-
-  createEffect(() => {
-    const lobbyId = lobby()?.id;
-    if (!lobbyId) {
-      return;
-    }
-
-    const lobbyUpdate = trpcClient.lobby.onUpdate.subscribe(
-      { lobbyId },
-      {
-        onData(updatedLobby) {
-          mutate((existingLobby) => {
-            if (!existingLobby) {
-              return existingLobby;
-            }
-            return {
-              ...existingLobby,
-              ...updatedLobby,
-            };
-          });
-        },
-        onError(err) {
-          snackbar.error(err.message);
-          console.error("error", err);
-        },
-        onComplete() {
-          snackbar.success("Poistuttiin huoneesta");
-          navigate("/lobby/list");
-        },
-      }
-    );
-
-    onCleanup(() => {
-      lobbyUpdate.unsubscribe();
-    });
-  });
+  const routeData = useRouteData<RouteData>();
+  const params = useParams();
 
   const onLobbyLeave = async () => {
     try {
-      const lobbyId = lobby()?.id;
+      const lobbyId = Number(params.id);
       if (!lobbyId) {
         return;
       }
@@ -70,12 +32,10 @@ const LobbyViewComponent: Component = () => {
     <div class="block space-y-4 w-full lg:w-[1000px]">
       <div class="flex flex-row space-x-4">
         <div class="flex-1 bg-white">
-          <Players lobby={lobby} />
+          <Players players={routeData.lobby()?.players || []} />
         </div>
         <div class="flex-1 bg-white">
-          <Show when={lobby()}>
-            <Chat lobby={lobby} />
-          </Show>
+          <Chat messages={routeData.messages} />
         </div>
       </div>
       <div class="flex flex-row space-x-2">

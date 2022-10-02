@@ -20,7 +20,7 @@ export type LobbyCreateInput = inferProcedureInput<
   AppRouter["lobby"]["create"]
 >;
 
-export type LobbyType = inferProcedureOutput<
+export type GameType = inferProcedureOutput<
   AppRouter["lobby"]["types"]
 >[number];
 

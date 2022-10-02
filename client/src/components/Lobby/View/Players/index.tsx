@@ -1,15 +1,15 @@
 import type { Component } from "solid-js";
-import { Resource, Show, For } from "solid-js";
-import { LobbyInside } from "trpc/types";
+import { Show, For } from "solid-js";
+import { User } from "trpc/types";
 
 type Props = {
-  lobby: Resource<LobbyInside>;
+  players: User[];
 };
 
 const LobbyPlayers: Component<Props> = (props) => {
   return (
     <Show
-      when={props.lobby()?.players}
+      when={props.players}
       fallback={
         <div class="flex flex-col items-center text-white">Ei pelaajia</div>
       }
@@ -29,7 +29,7 @@ const LobbyPlayers: Component<Props> = (props) => {
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-                <For each={props.lobby()?.players}>
+                <For each={props.players}>
                   {(player) => (
                     <tr>
                       <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">

@@ -1,15 +1,16 @@
-import { For, Show, Resource } from "solid-js";
+import { For, Show } from "solid-js";
 import type { Component } from "solid-js";
-import { LobbyInList } from "trpc/types";
+
+import { RouteData } from "./index";
 
 type Props = {
-  lobbies: Resource<LobbyInList[]>;
+  lobbyList: RouteData["lobbyList"];
   onJoin: (id: number) => void;
 };
 
 const ListLobby: Component<Props> = (props) => (
   <Show
-    when={props.lobbies()?.length}
+    when={props.lobbyList()?.length}
     fallback={
       <div class="flex flex-col items-center text-white">
         Ei aktiivisia huoneita
@@ -52,7 +53,7 @@ const ListLobby: Component<Props> = (props) => (
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-              <For each={props.lobbies()}>
+              <For each={props.lobbyList()}>
                 {(lobby) => (
                   <tr>
                     <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">

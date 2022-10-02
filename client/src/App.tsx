@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { lazy, Suspense } from "solid-js";
+import { lazy, Suspense, ErrorBoundary } from "solid-js";
 import { Show } from "solid-js/web";
 import { Routes, Route, Navigate } from "@solidjs/router";
 import useAuth from "hooks/useAuth";
@@ -43,7 +43,14 @@ const App: Component = () => {
             <Route path="/lobby">
               <Route path="list" component={LobbyList} data={lobbyListData} />
               <Route path="create" component={LobbyCreate} />
-              <Route path=":id" component={LobbyView} data={lobbyViewData} />
+              <ErrorBoundary
+                fallback={(err) => {
+                  console.log("err", err);
+                  return <p>asd</p>;
+                }}
+              >
+                <Route path=":id" component={LobbyView} data={lobbyViewData} />
+              </ErrorBoundary>
             </Route>
           </Show>
           <Route path="*" element={<Navigate href={getPath} />} />

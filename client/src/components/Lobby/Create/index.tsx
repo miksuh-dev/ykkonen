@@ -1,20 +1,21 @@
 import { createSignal } from "solid-js";
 import type { Component } from "solid-js";
 import trpcClient from "trpc";
-import { useNavigate } from "@solidjs/router";
-import { Resource } from "solid-js";
+import { useNavigate, useRouteData } from "@solidjs/router";
 import LobbyCreate from "./LobbyCreate";
-import { LobbyType, LobbyCreateInput } from "trpc/types";
+import { LobbyCreateInput } from "trpc/types";
 import { handleError } from "utils/error";
+import data from "view/Lobby/Create/data";
 
 export type FormErrors = Partial<
   Omit<LobbyCreateInput, "type"> & { type: string; general: string }
 >;
 
-const LobbyCreateComponent: Component<{
-  types: Resource<LobbyType[]>;
-}> = (props) => {
+export type RouteData = ReturnType<typeof data>;
+
+const LobbyCreateComponent: Component = () => {
   const navigate = useNavigate();
+  const [types] = useRouteData<RouteData>();
 
   const [form, setForm] = createSignal<LobbyCreateInput>({
     name: "",
@@ -41,7 +42,7 @@ const LobbyCreateComponent: Component<{
     <LobbyCreate
       form={form}
       error={error}
-      types={props.types}
+      types={types}
       onChange={setForm}
       onSubmit={handleSubmit}
     />

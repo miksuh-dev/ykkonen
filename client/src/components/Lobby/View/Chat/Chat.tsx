@@ -1,10 +1,10 @@
-import type { Component } from "solid-js";
+import { Component } from "solid-js";
 import { Accessor, Setter, Show, For } from "solid-js";
 import { DateTime } from "luxon";
 import { IncomingMessage } from "trpc/types";
 
 type Props = {
-  messages: Accessor<IncomingMessage["message"][]>;
+  messages: Accessor<IncomingMessage[]>;
   currentMessage: Accessor<string>;
   onChange: Setter<string>;
   onSubmit: (data: string) => void;
@@ -16,7 +16,7 @@ const LobbyChat: Component<Props> = (props) => {
     <div class="flex bg-white p-2 flex-col h-full">
       <div class="flex-1 overflow-y-auto min-h-[500px] max-h-[500px]">
         <Show
-          when={props.messages()?.length}
+          when={props.messages().length}
           fallback={
             <div class="flex flex-col items-center text-white">Ei viestejä</div>
           }

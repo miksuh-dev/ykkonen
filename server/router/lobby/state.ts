@@ -7,6 +7,7 @@ export interface Message {
   content: string;
   username: string;
   timestamp: number;
+  lobbyId: number;
 }
 
 // Server state
