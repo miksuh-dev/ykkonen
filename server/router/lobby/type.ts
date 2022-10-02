@@ -1,6 +1,6 @@
 import { Message } from "./state";
 
 export interface IncomingMessage {
-  id: number;
+  lobbyId: number;
   message: Message;
 }

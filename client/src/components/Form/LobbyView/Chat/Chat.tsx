@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { IncomingMessage } from "trpc/types";
 
 type Props = {
-  messages: Accessor<IncomingMessage[]>;
+  messages: Accessor<IncomingMessage["message"][]>;
   currentMessage: Accessor<string>;
   onChange: Setter<string>;
   onSubmit: (data: string) => void;

@@ -12,7 +12,9 @@ type Props = {
 const LobbyChat: Component<Props> = (props) => {
   const snackbar = useSnackbar();
   const [message, setMessage] = createSignal("");
-  const [messages, setMessages] = createSignal<IncomingMessage[]>([]);
+  const [messages, setMessages] = createSignal<IncomingMessage["message"][]>(
+    []
+  );
 
   let ref: HTMLDivElement | undefined = undefined;
 
@@ -25,8 +27,10 @@ const LobbyChat: Component<Props> = (props) => {
     const lobbyUpdate = trpcClient.lobby.onMessage.subscribe(
       { lobbyId },
       {
-        onData(incomingMessage) {
-          setMessages((messages) => [...messages, incomingMessage]);
+        onData(data) {
+          if (props.lobby()?.id === data.lobbyId) {
+            setMessages((messages) => [...messages, data.message]);
+          }
         },
         onError(err) {
           snackbar.error(err.message);

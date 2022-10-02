@@ -165,12 +165,17 @@ export const lobbyRouter = t.router({
         });
       }
 
-      const message = lobbyState.addMessage(lobbyId, {
+      const messageBody = lobbyState.addMessage(lobbyId, {
         id: Date.now().toString(),
         username: user.username,
         content: input.content,
         timestamp: Date.now(),
       });
+
+      const message = {
+        lobbyId: input.lobbyId,
+        message: messageBody,
+      };
 
       ee.emit(`onMessage-${input.lobbyId}`, message);
 
@@ -183,25 +188,15 @@ export const lobbyRouter = t.router({
       })
     )
     .subscription(({ input, ctx }) => {
-      const { user } = ctx;
-      //
-
-      if (!lobbyState.exists(input.lobbyId)) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Lobby not found",
-        });
-      }
-
-      if (!lobbyState.hasPlayer(input.lobbyId, user.id)) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Not in lobby",
-        });
-      }
-
       return observable<GameStateLobby>((emit) => {
         const onUpdate = (updatedLobby: GameStateLobby) => {
+          const userId = ctx.user.id;
+
+          if (!lobbyState.hasPlayer(updatedLobby.id, userId)) {
+            emit.next(updatedLobby);
+            emit.complete();
+          }
+
           emit.next(updatedLobby);
         };
 
@@ -218,25 +213,17 @@ export const lobbyRouter = t.router({
       })
     )
     .subscription(({ input, ctx }) => {
-      const { user } = ctx;
-      //
-
-      if (!lobbyState.exists(input.lobbyId)) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Lobby not found",
-        });
-      }
-
-      if (!lobbyState.hasPlayer(input.lobbyId, user.id)) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Not in lobby",
-        });
-      }
-
       return observable<IncomingMessage>((emit) => {
         const onUpdate = (incomingMessage: IncomingMessage) => {
+          const userId = ctx.user.id;
+
+          if (!lobbyState.hasPlayer(incomingMessage.lobbyId, userId)) {
+            emit.next(incomingMessage);
+            emit.complete();
+
+            return;
+          }
+
           emit.next(incomingMessage);
         };
 

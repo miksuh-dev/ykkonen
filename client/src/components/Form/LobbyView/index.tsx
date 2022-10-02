@@ -17,6 +17,7 @@ const LobbyViewComponent: Component = () => {
     if (params.id === undefined) {
       throw new Error("No id");
     }
+
     return trpcClient.lobby.get.query({ id: Number(params.id) });
   });
 
@@ -30,6 +31,7 @@ const LobbyViewComponent: Component = () => {
       { lobbyId },
       {
         onData(updatedLobby) {
+          console.log("data", updatedLobby);
           mutate((existingLobby) => {
             if (!existingLobby) {
               return existingLobby;
@@ -43,6 +45,10 @@ const LobbyViewComponent: Component = () => {
         onError(err) {
           snackbar.error(err.message);
           console.error("error", err);
+        },
+        onComplete() {
+          snackbar.success("Poistuttiin huoneesta");
+          navigate("/lobby/list");
         },
       }
     );
@@ -64,8 +70,6 @@ const LobbyViewComponent: Component = () => {
       if (err instanceof Error) {
         snackbar.error(err.message);
       }
-    } finally {
-      navigate("/lobby/list");
     }
   };
 
@@ -87,9 +91,7 @@ const LobbyViewComponent: Component = () => {
             Poistu
           </button>
         </div>
-        <button class="btn-primary" onClick={onLobbyLeave}>
-          Aloita
-        </button>
+        <button class="btn-primary">Aloita</button>
       </div>
     </div>
   );
