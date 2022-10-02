@@ -1,21 +1,17 @@
-import { onMount, onCleanup, createResource } from "solid-js";
+import { onMount, onCleanup } from "solid-js";
 import type { Component } from "solid-js";
 import trpcClient from "trpc";
-import { LobbyInList } from "trpc/types";
 import useSnackbar from "hooks/useSnackbar";
-import { useNavigate } from "@solidjs/router";
+import { useNavigate, useRouteData } from "@solidjs/router";
 import ListLobby from "./List";
+import data from "view/Lobby/List/data";
+
+export type RouteData = ReturnType<typeof data>;
 
 const ListLobbyComponent: Component = () => {
   const snackbar = useSnackbar();
   const navigate = useNavigate();
-
-  const [lobbies, { mutate }] = createResource<LobbyInList[]>(
-    () => trpcClient.lobby.list.query(),
-    {
-      initialValue: [],
-    }
-  );
+  const [lobbies, { mutate }] = useRouteData<RouteData>();
 
   onMount(() => {
     const listUpdate = trpcClient.lobby.onListUpdate.subscribe(undefined, {

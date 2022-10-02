@@ -1,16 +1,20 @@
-import type { Component } from "solid-js";
+import { Component, ErrorBoundary } from "solid-js";
 import { lazy, Suspense } from "solid-js";
 import { Show } from "solid-js/web";
 import { Routes, Route, Navigate } from "@solidjs/router";
 import useAuth from "hooks/useAuth";
 
+import lobbyViewData from "view/Lobby/View/data";
+import lobbyListData from "view/Lobby/List/data";
+
 const Loading = lazy(() => import("components/Loading"));
 const Login = lazy(() => import("view/Login"));
 
+const LobbyCreate = lazy(() => import("view/Lobby//Create"));
+const LobbyList = lazy(() => import("view/Lobby/List"));
+const LobbyView = lazy(() => import("view/Lobby/View"));
+
 const Register = lazy(() => import("view/Register"));
-const LobbyCreate = lazy(() => import("view/LobbyCreate"));
-const LobbyList = lazy(() => import("view/LobbyList"));
-const LobbyView = lazy(() => import("view/LobbyView"));
 
 const App: Component = () => {
   const auth = useAuth();
@@ -37,9 +41,9 @@ const App: Component = () => {
             }
           >
             <Route path="/lobby">
-              <Route path="list" component={LobbyList} />
+              <Route path="list" component={LobbyList} data={lobbyListData} />
               <Route path="create" component={LobbyCreate} />
-              <Route path=":id" component={LobbyView} />
+              <Route path=":id" component={LobbyView} data={lobbyViewData} />
             </Route>
           </Show>
           <Route path="*" element={<Navigate href={getPath} />} />

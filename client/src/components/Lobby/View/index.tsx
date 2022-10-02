@@ -1,25 +1,20 @@
 import type { Component } from "solid-js";
-import { createResource, Show } from "solid-js";
+import { /* createResource, */ Show } from "solid-js";
 import { createEffect, onCleanup } from "solid-js";
-import { useParams, useNavigate } from "@solidjs/router";
-import { LobbyInside } from "trpc/types";
+import { /* useParams, */ useNavigate, useRouteData } from "@solidjs/router";
 import trpcClient from "trpc";
 import useSnackbar from "hooks/useSnackbar";
 import Players from "./Players";
 import Chat from "./Chat";
+import data from "view/Lobby/View/data";
+
+export type RouteData = ReturnType<typeof data>;
 
 const LobbyViewComponent: Component = () => {
-  const params = useParams();
+  // const params = useParams();
   const snackbar = useSnackbar();
   const navigate = useNavigate();
-
-  const [lobby, { mutate }] = createResource<LobbyInside>(() => {
-    if (params.id === undefined) {
-      throw new Error("No id");
-    }
-
-    return trpcClient.lobby.get.query({ id: Number(params.id) });
-  });
+  const [lobby, { mutate }] = useRouteData<RouteData>();
 
   createEffect(() => {
     const lobbyId = lobby()?.id;

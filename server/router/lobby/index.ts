@@ -29,11 +29,18 @@ export const lobbyRouter = t.router({
   get: authedProcedure
     .input(
       z.object({
-        id: z.number().min(0),
+        id: z.number().min(1),
       })
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.user.id;
+
+      if (!lobbyState.exists(input.id)) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Lobby not found",
+        });
+      }
 
       if (!lobbyState.hasPlayer(input.id, userId)) {
         throw new TRPCError({

@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import LobbyView from "components/Form/LobbyView";
+import LobbyView from "components/Lobby/View";
 import Content from "components/Content";
 
 const LobbyViewView: Component = () => {
