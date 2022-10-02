@@ -1,4 +1,5 @@
 import { IncomingMessage } from "http";
+import { TRPCError } from "@trpc/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma";
@@ -38,7 +39,10 @@ export const getUserFromRequest = async (
 export const verifyJWTToken = async (token: string) => {
   const authSecret = process.env.AUTH_TOKEN_SECRET;
   if (!authSecret) {
-    throw new Error("No token data");
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "No token data",
+    });
   }
 
   try {
@@ -57,19 +61,28 @@ export const verifyJWTToken = async (token: string) => {
       },
     });
     if (!user) {
-      throw new Error("User not found");
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "User not found",
+      });
     }
 
     return user;
   } catch (err) {
-    throw new Error("Invalid token");
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "No token data",
+    });
   }
 };
 
 export const createSession = (userData: { id: number; username: string }) => {
   const authSecret = process.env.AUTH_TOKEN_SECRET;
   if (!authSecret) {
-    throw new Error("No token data");
+    throw new TRPCError({
+      code: "INTERNAL_SERVER_ERROR",
+      message: "No token data",
+    });
   }
 
   const token = jwt.sign(userData, authSecret, {

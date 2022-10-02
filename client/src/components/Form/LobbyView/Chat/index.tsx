@@ -14,6 +14,8 @@ const LobbyChat: Component<Props> = (props) => {
   const [message, setMessage] = createSignal("");
   const [messages, setMessages] = createSignal<IncomingMessage>([]);
 
+  let ref: HTMLDivElement | undefined = undefined;
+
   createEffect(() => {
     const lobbyId = props.lobby()?.id;
     if (!lobbyId) {
@@ -57,8 +59,6 @@ const LobbyChat: Component<Props> = (props) => {
       }
     }
   };
-
-  let ref: HTMLDivElement | undefined = undefined;
 
   createEffect(
     on(

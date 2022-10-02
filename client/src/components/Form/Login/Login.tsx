@@ -1,17 +1,14 @@
 import { Link } from "@solidjs/router";
 import { Accessor, Setter } from "solid-js";
 import type { Component } from "solid-js";
-
-type FormProps = {
-  username: string;
-  password: string;
-};
+import { UserLoginInput } from "trpc/types";
+import { FormError } from "./index";
 
 type Props = {
-  form: Accessor<FormProps>;
-  onChange: Setter<FormProps>;
-  error: Accessor<Partial<FormProps>>;
-  onSubmit: (data: FormProps) => void;
+  form: Accessor<UserLoginInput>;
+  onChange: Setter<UserLoginInput>;
+  error: Accessor<FormError>;
+  onSubmit: (data: UserLoginInput) => void;
 };
 
 const Login: Component<Props> = (props) => (
@@ -69,6 +66,9 @@ const Login: Component<Props> = (props) => (
           <div class="text-red-500 text-sm">{props.error().password}</div>
         )}
       </div>
+      {props.error().general && (
+        <div class="text-red-500 text-sm">{props.error().general}</div>
+      )}
     </div>
     <div class="w-full space-y-4">
       <button

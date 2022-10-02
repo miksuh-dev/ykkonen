@@ -4,14 +4,15 @@ import { For } from "solid-js";
 import { LobbyType } from "trpc/types";
 import { Resource } from "solid-js";
 import { Accessor, Setter } from "solid-js";
-import { FormProps, FormErrors } from "./index";
+import { LobbyCreateInput } from "trpc/types";
+import { FormErrors } from "./index";
 
 type Props = {
-  form: Accessor<FormProps>;
+  form: Accessor<LobbyCreateInput>;
   types: Resource<LobbyType[]>;
-  onChange: Setter<FormProps>;
+  onChange: Setter<LobbyCreateInput>;
   error: Accessor<FormErrors>;
-  onSubmit: (data: FormProps) => void;
+  onSubmit: (data: LobbyCreateInput) => void;
 };
 
 const CreateLobby: Component<Props> = (props) => (
@@ -60,6 +61,9 @@ const CreateLobby: Component<Props> = (props) => (
         <div class="text-red-500">{props.error().type}</div>
       )}
     </div>
+    {props.error().general && (
+      <div class="text-red-500">{props.error().general}</div>
+    )}
     <div class="w-full space-y-4">
       <button
         class="btn-primary-full"

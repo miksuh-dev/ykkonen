@@ -1,34 +1,34 @@
 import { createSignal } from "solid-js";
-// import { Link } from "@solidjs/router";
 import type { Component } from "solid-js";
 import Login from "./Login";
 import useAuth from "hooks/useAuth";
+import { UserLoginInput } from "trpc/types";
+import { handleError } from "utils/error";
 
-type FormProps = {
-  username: string;
-  password: string;
+export type FormError = Partial<UserLoginInput> & {
+  general: string;
 };
 
 const LoginComponent: Component = () => {
   const auth = useAuth();
-  //
-  const [form, setForm] = createSignal<FormProps>({
+
+  const [form, setForm] = createSignal<UserLoginInput>({
     username: "",
     password: "",
   });
 
-  const [error, setError] = createSignal<Partial<FormProps>>({
+  const [error, setError] = createSignal<FormError>({
     username: "",
     password: "",
+    general: "",
   });
 
-  const handleSubmit = async (submitData: FormProps) => {
+  const handleSubmit = async (submitData: UserLoginInput) => {
     try {
-      await auth.action.login(submitData.username, submitData.password);
+      await auth.action.login(submitData);
     } catch (err) {
-      if (err instanceof Error) {
-        setError({ username: err.message });
-      }
+      const errors = handleError(err);
+      if (errors) setError(errors);
     }
   };
 

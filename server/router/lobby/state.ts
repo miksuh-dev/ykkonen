@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { Player } from "../../type/prisma";
 import { Lobby } from "./query";
 
@@ -66,7 +67,7 @@ const getOrCreate = (lobbyId: number) => {
   // TODO: Find better way to set GameStateLobby as not undefined
   const lobby = stateLobby.get(lobbyId);
   if (!lobby) {
-    throw new Error("Lobby not found");
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Lobby not found" });
   }
 
   return lobby;
@@ -145,7 +146,7 @@ export const removePlayer = (lobbyId: number, playerId: number) => {
   const lobby = stateLobby.get(lobbyId);
 
   if (!lobby) {
-    throw new Error("Lobby not found");
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Lobby not found" });
   }
 
   if (lobby.players.has(playerId)) {

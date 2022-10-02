@@ -54,6 +54,7 @@ export const userRouter = t.router({
       z.object({
         username: z.string().min(1),
         password: z.string().min(1),
+        passwordAgain: z.string().min(1),
         // .min(8, "Password must be at least 8 characters")
         // .max(32, "Password must be at most 20 characters")
         // .refine(

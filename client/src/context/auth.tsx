@@ -9,6 +9,7 @@ import {
 import trpcClient from "trpc";
 import { User } from "trpc/types";
 import type { Component } from "solid-js";
+import { UserRegisterInput, UserLoginInput } from "trpc/types";
 
 type AuthStoreProps = {
   user: Accessor<User | null>;
@@ -18,9 +19,9 @@ type AuthStoreProps = {
 
 interface AuthContextProps extends AuthStoreProps {
   action: {
-    login: (username: string, password: string) => Promise<void>;
+    login: (data: UserLoginInput) => Promise<void>;
     logout: () => void;
-    register: (username: string, password: string) => Promise<void>;
+    register: (data: UserRegisterInput) => Promise<void>;
   };
 }
 
@@ -60,12 +61,9 @@ export const AuthProvider: Component<{
       });
   };
 
-  const login = async (username: string, password: string) => {
+  const login = async (data: UserLoginInput) => {
     try {
-      const res = await trpcClient.user.login.mutate({
-        username,
-        password,
-      });
+      const res = await trpcClient.user.login.mutate(data);
 
       if (res.token) {
         localStorage.setItem("token", res.token);
@@ -78,12 +76,9 @@ export const AuthProvider: Component<{
     }
   };
 
-  const register = async (username: string, password: string) => {
+  const register = async (data: UserRegisterInput) => {
     try {
-      const res = await trpcClient.user.register.mutate({
-        username: username,
-        password: password,
-      });
+      const res = await trpcClient.user.register.mutate(data);
 
       if (res.token) {
         localStorage.setItem("token", res.token);

@@ -2,43 +2,35 @@ import { createSignal } from "solid-js";
 import useAuth from "hooks/useAuth";
 import type { Component } from "solid-js";
 import Register from "./Register";
+import { UserRegisterInput } from "trpc/types";
+import { handleError } from "utils/error";
 
-export type FormProps = {
-  username: string;
-  password: string;
-  passwordAgain: string;
+export type FormError = Partial<UserRegisterInput> & {
+  general: string;
 };
 
 const RegisterComponent: Component = () => {
   const auth = useAuth();
 
-  const [form, setForm] = createSignal<FormProps>({
+  const [form, setForm] = createSignal<UserRegisterInput>({
     username: "",
     password: "",
     passwordAgain: "",
   });
 
-  const [error, setError] = createSignal<Partial<FormProps>>({
+  const [error, setError] = createSignal<FormError>({
     username: "",
     password: "",
     passwordAgain: "",
+    general: "",
   });
 
-  const handleSubmit = async (submitData: FormProps) => {
-    if (submitData.password !== submitData.passwordAgain) {
-      setError({
-        password: "Passwords don't match",
-        passwordAgain: "Passwords don't match",
-      });
-      return;
-    }
-
+  const handleSubmit = async (submitData: UserRegisterInput) => {
     try {
-      await auth.action.register(submitData.username, submitData.password);
+      await auth.action.register(submitData);
     } catch (err) {
-      if (err instanceof Error) {
-        setError({ username: err.message });
-      }
+      const errors = handleError(err);
+      if (errors) setError(errors);
     }
   };
 
