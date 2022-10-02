@@ -1,5 +1,5 @@
 import type { Component } from "solid-js";
-import { lazy } from "solid-js";
+import { lazy, Suspense } from "solid-js";
 import { Show } from "solid-js/web";
 import { Routes, Route, Navigate } from "@solidjs/router";
 import useAuth from "hooks/useAuth";
@@ -24,26 +24,28 @@ const App: Component = () => {
   };
 
   return (
-    <Show when={auth.ready()} fallback={<Loading />}>
-      <Routes>
-        <Show
-          when={auth.authenticated()}
-          fallback={
-            <>
-              <Route path="/login" component={Login} />
-              <Route path="/register" component={Register} />
-            </>
-          }
-        >
-          <Route path="/lobby">
-            <Route path="list" component={LobbyList} />
-            <Route path="create" component={LobbyCreate} />
-            <Route path=":id" component={LobbyView} />
-          </Route>
-        </Show>
-        <Route path="*" element={<Navigate href={getPath} />} />
-      </Routes>
-    </Show>
+    <Suspense fallback={<Loading />}>
+      <Show when={auth.ready()} fallback={<Loading />}>
+        <Routes>
+          <Show
+            when={auth.authenticated()}
+            fallback={
+              <>
+                <Route path="/login" component={Login} />
+                <Route path="/register" component={Register} />
+              </>
+            }
+          >
+            <Route path="/lobby">
+              <Route path="list" component={LobbyList} />
+              <Route path="create" component={LobbyCreate} />
+              <Route path=":id" component={LobbyView} />
+            </Route>
+          </Show>
+          <Route path="*" element={<Navigate href={getPath} />} />
+        </Routes>
+      </Show>
+    </Suspense>
   );
 };
 
