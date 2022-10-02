@@ -228,7 +228,7 @@ export const lobbyRouter = t.router({
     )
     .subscription(({ input, ctx }) => {
       return observable<Message>((emit) => {
-        const onUpdate = (incomingMessage: Message) => {
+        const onMessage = (incomingMessage: Message) => {
           const userId = ctx.user.id;
 
           if (!lobbyState.hasPlayer(incomingMessage.lobbyId, userId)) {
@@ -241,22 +241,22 @@ export const lobbyRouter = t.router({
           emit.next(incomingMessage);
         };
 
-        ee.on(`onMessage-${input.lobbyId}`, onUpdate);
+        ee.on(`onMessage-${input.lobbyId}`, onMessage);
         return () => {
-          ee.off(`onMessage-${input.lobbyId}`, onUpdate);
+          ee.off(`onMessage-${input.lobbyId}`, onMessage);
         };
       });
     }),
   onListUpdate: authedProcedure.subscription(() => {
     return observable<GameStateLobby>((emit) => {
-      const onUpdate = (lobby: GameStateLobby) => {
+      const onListUpdate = (lobby: GameStateLobby) => {
         // emit data to client
         emit.next(lobby);
       };
 
-      ee.on("onListUpdate", onUpdate);
+      ee.on("onListUpdate", onListUpdate);
       return () => {
-        ee.off("onListUpdate", onUpdate);
+        ee.off("onListUpdate", onListUpdate);
       };
     });
   }),
