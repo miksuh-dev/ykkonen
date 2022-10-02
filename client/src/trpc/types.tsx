@@ -1,4 +1,5 @@
 import type { inferProcedureInput, inferProcedureOutput } from "@trpc/server";
+import { inferObservableValue } from "@trpc/server/observable";
 import type { AppRouter } from "../../../server/router";
 
 export type LobbyInside = inferProcedureOutput<AppRouter["lobby"]["get"]>;
@@ -23,6 +24,6 @@ export type LobbyType = inferProcedureOutput<
   AppRouter["lobby"]["types"]
 >[number];
 
-export type IncomingMessage = inferProcedureOutput<
-  AppRouter["lobby"]["onMessage"]
+export type IncomingMessage = inferObservableValue<
+  inferProcedureOutput<AppRouter["lobby"]["onMessage"]>
 >;

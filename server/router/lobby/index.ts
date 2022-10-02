@@ -174,7 +174,7 @@ export const lobbyRouter = t.router({
 
       ee.emit(`onMessage-${input.lobbyId}`, message);
 
-      return { message };
+      return message;
     }),
   onUpdate: authedProcedure
     .input(
