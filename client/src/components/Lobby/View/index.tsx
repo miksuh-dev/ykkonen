@@ -1,7 +1,7 @@
 import type { Component } from "solid-js";
-import { /* createResource, */ Show } from "solid-js";
+import { Show } from "solid-js";
 import { createEffect, onCleanup } from "solid-js";
-import { /* useParams, */ useNavigate, useRouteData } from "@solidjs/router";
+import { useNavigate, useRouteData } from "@solidjs/router";
 import trpcClient from "trpc";
 import useSnackbar from "hooks/useSnackbar";
 import Players from "./Players";
@@ -11,7 +11,6 @@ import data from "view/Lobby/View/data";
 export type RouteData = ReturnType<typeof data>;
 
 const LobbyViewComponent: Component = () => {
-  // const params = useParams();
   const snackbar = useSnackbar();
   const navigate = useNavigate();
   const [lobby, { mutate }] = useRouteData<RouteData>();
@@ -26,7 +25,6 @@ const LobbyViewComponent: Component = () => {
       { lobbyId },
       {
         onData(updatedLobby) {
-          console.log("data", updatedLobby);
           mutate((existingLobby) => {
             if (!existingLobby) {
               return existingLobby;

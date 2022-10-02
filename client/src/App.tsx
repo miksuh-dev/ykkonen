@@ -1,4 +1,4 @@
-import { Component, ErrorBoundary } from "solid-js";
+import { Component } from "solid-js";
 import { lazy, Suspense } from "solid-js";
 import { Show } from "solid-js/web";
 import { Routes, Route, Navigate } from "@solidjs/router";
@@ -10,7 +10,7 @@ import lobbyListData from "view/Lobby/List/data";
 const Loading = lazy(() => import("components/Loading"));
 const Login = lazy(() => import("view/Login"));
 
-const LobbyCreate = lazy(() => import("view/Lobby//Create"));
+const LobbyCreate = lazy(() => import("view/Lobby/Create"));
 const LobbyList = lazy(() => import("view/Lobby/List"));
 const LobbyView = lazy(() => import("view/Lobby/View"));
 

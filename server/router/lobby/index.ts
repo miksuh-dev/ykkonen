@@ -35,12 +35,9 @@ export const lobbyRouter = t.router({
     .query(async ({ ctx, input }) => {
       const userId = ctx.user.id;
 
-      if (!lobbyState.exists(input.id)) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Lobby not found",
-        });
-      }
+      const lobby = await getLobby(input.id);
+
+      const lobbyWithState = lobbyState.extend(lobby, ["players"]);
 
       if (!lobbyState.hasPlayer(input.id, userId)) {
         throw new TRPCError({
@@ -49,9 +46,7 @@ export const lobbyRouter = t.router({
         });
       }
 
-      const lobby = await getLobby(input.id);
-
-      return lobbyState.extend(lobby, ["players"]);
+      return lobbyWithState;
     }),
   create: authedProcedure
     .input(
@@ -61,11 +56,14 @@ export const lobbyRouter = t.router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const { user } = ctx;
+
       const lobbyType = await ctx.prisma.gameType.findUnique({
         where: {
           id: input.type,
         },
       });
+
       if (!lobbyType) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -80,11 +78,25 @@ export const lobbyRouter = t.router({
           status: GameStatus.WAITING,
           gameTypeId: input.type,
         },
+        select: {
+          id: true,
+          name: true,
+          gameType: true,
+          status: true,
+          owner: {
+            select: {
+              id: true,
+              username: true,
+            },
+          },
+        },
       });
+
+      lobbyState.addPlayer(lobby.id, user);
 
       ee.emit("onListUpdate", lobby);
 
-      return lobby;
+      return lobbyState.extend(lobby, ["players"]);
     }),
   join: authedProcedure
     .input(

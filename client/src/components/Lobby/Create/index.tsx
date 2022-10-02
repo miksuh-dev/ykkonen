@@ -28,9 +28,9 @@ const LobbyCreateComponent: Component<{
 
   const handleSubmit = async (submitData: LobbyCreateInput) => {
     try {
-      await trpcClient.lobby.create.mutate(submitData);
+      const lobby = await trpcClient.lobby.create.mutate(submitData);
 
-      navigate("/lobby/list"); //debug
+      navigate(`/lobby/${lobby.id}`);
     } catch (err) {
       const errors = handleError(err);
       if (errors) setError(errors);
