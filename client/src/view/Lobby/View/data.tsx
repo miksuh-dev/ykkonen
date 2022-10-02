@@ -1,11 +1,6 @@
 import { IncomingMessage, LobbyInside } from "trpc/types";
 import { RouteDataFuncArgs } from "@solidjs/router";
-import {
-  createEffect,
-  createResource,
-  createSignal,
-  onCleanup,
-} from "solid-js";
+import { onMount, createResource, createSignal, onCleanup } from "solid-js";
 import trpcClient from "trpc";
 import useSnackbar from "hooks/useSnackbar";
 
@@ -20,9 +15,9 @@ function LobbyData({ params, navigate }: RouteDataFuncArgs) {
 
   const [messages, setMessages] = createSignal<IncomingMessage[]>([]);
 
-  createEffect(() => {
-    const lobbyId = lobby()?.id;
-    if (!lobbyId) return;
+  onMount(() => {
+    const lobbyId = Number(params.id);
+    if (!lobbyId) throw new Error("Lobby not found");
 
     const lobbyUpdate = trpcClient.lobby.onUpdate.subscribe(
       { lobbyId },
@@ -53,9 +48,9 @@ function LobbyData({ params, navigate }: RouteDataFuncArgs) {
     });
   });
 
-  createEffect(() => {
-    const lobbyId = lobby()?.id;
-    if (!lobbyId) return;
+  onMount(() => {
+    const lobbyId = Number(params.id);
+    if (!lobbyId) throw new Error("Lobby not found");
 
     const lobbyUpdate = trpcClient.lobby.onMessage.subscribe(
       { lobbyId },

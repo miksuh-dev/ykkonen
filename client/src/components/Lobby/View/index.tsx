@@ -1,5 +1,5 @@
 import { Component } from "solid-js";
-import { useParams, useRouteData } from "@solidjs/router";
+import { useNavigate, useParams, useRouteData } from "@solidjs/router";
 import trpcClient from "trpc";
 import useSnackbar from "hooks/useSnackbar";
 import Players from "./Players";
@@ -10,21 +10,22 @@ export type RouteData = ReturnType<typeof data>;
 
 const LobbyViewComponent: Component = () => {
   const snackbar = useSnackbar();
+  const navigate = useNavigate();
   const routeData = useRouteData<RouteData>();
   const params = useParams();
 
   const onLobbyLeave = async () => {
     try {
       const lobbyId = Number(params.id);
-      if (!lobbyId) {
-        return;
+      if (lobbyId) {
+        await trpcClient.lobby.leave.mutate({ lobbyId });
       }
-
-      await trpcClient.lobby.leave.mutate({ lobbyId });
     } catch (err) {
       if (err instanceof Error) {
         snackbar.error(err.message);
       }
+    } finally {
+      navigate("/lobby/list");
     }
   };
 

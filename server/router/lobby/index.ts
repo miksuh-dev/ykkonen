@@ -125,11 +125,11 @@ export const lobbyRouter = t.router({
         //   code: "BAD_REQUEST",
         //   message: "You are already in this lobby",
         // });
-        lobbyState.addPlayer(lobby.id, user);
-      }
+        const players = lobbyState.addPlayer(lobby.id, user);
 
-      ee.emit(`onUpdate-${lobby.id}`, lobbyState.get(lobbyId));
-      ee.emit("onListUpdate", lobbyState.get(lobbyId, ["players"]));
+        ee.emit(`onUpdate-${lobby.id}`, { lobbyId, players });
+        ee.emit("onListUpdate", { lobbyId, players });
+      }
 
       return { lobbyId };
     }),
@@ -150,10 +150,10 @@ export const lobbyRouter = t.router({
         });
       }
 
-      const updatedLobby = lobbyState.removePlayer(lobbyId, user.id);
+      const players = lobbyState.removePlayer(lobbyId, user.id);
 
-      ee.emit(`onUpdate-${lobbyId}`, updatedLobby);
-      ee.emit("onListUpdate", updatedLobby);
+      ee.emit(`onUpdate-${lobbyId}`, { lobbyId, players });
+      ee.emit("onListUpdate", { lobbyId, players });
 
       return { lobbyId };
     }),
@@ -202,15 +202,15 @@ export const lobbyRouter = t.router({
       })
     )
     .subscription(({ input, ctx }) => {
+      if (!lobbyState.hasPlayer(input.lobbyId, ctx.user.id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not in this lobby",
+        });
+      }
+
       return observable<GameStateLobby>((emit) => {
         const onUpdate = (updatedLobby: GameStateLobby) => {
-          const userId = ctx.user.id;
-
-          if (!lobbyState.hasPlayer(updatedLobby.id, userId)) {
-            emit.next(updatedLobby);
-            emit.complete();
-          }
-
           emit.next(updatedLobby);
         };
 
@@ -227,17 +227,15 @@ export const lobbyRouter = t.router({
       })
     )
     .subscription(({ input, ctx }) => {
+      if (!lobbyState.hasPlayer(input.lobbyId, ctx.user.id)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not in this lobby",
+        });
+      }
+
       return observable<Message>((emit) => {
         const onMessage = (incomingMessage: Message) => {
-          const userId = ctx.user.id;
-
-          if (!lobbyState.hasPlayer(incomingMessage.lobbyId, userId)) {
-            emit.next(incomingMessage);
-            emit.complete();
-
-            return;
-          }
-
           emit.next(incomingMessage);
         };
 

@@ -12,7 +12,7 @@ export interface Message {
 
 // Server state
 interface GameStateInternal {
-  id: number;
+  lobbyId: number;
   players: Map<number, Player>;
   messages: Message[];
 }
@@ -25,7 +25,7 @@ export type GameStateLobby = Omit<GameStateInternal, "players"> & {
 const stateLobby = new Map<number, GameStateInternal>();
 
 const initializeLobby = (lobbyId: number): GameStateInternal => ({
-  id: lobbyId,
+  lobbyId,
   players: new Map<number, Player>(),
   messages: [],
 });
