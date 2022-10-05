@@ -17,7 +17,7 @@ type Props = {
 const CreateLobby: Component<Props> = (props) => (
   <div class="block space-y-8">
     <div>
-      <label for="first_name" class="block mb-2 text-primary">
+      <label for="first_name" class="text-primary mb-2 block">
         Huoneen nimi
       </label>
       <input
@@ -35,12 +35,12 @@ const CreateLobby: Component<Props> = (props) => (
       )}
     </div>
     <div>
-      <label for="type" class="block mb-2 text-primary">
+      <label for="type" class="text-primary mb-2 block">
         Huoneen tyyppi
       </label>
       <select
         id="type"
-        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-custom-aqua-500 focus:border-custom-aqua-500 block w-full p-2.5"
+        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-custom-aqua-500 focus:ring-custom-aqua-500"
         value={props.form().type}
         onChange={(e) => {
           props.onChange({

@@ -25,7 +25,7 @@ const Login: Component<Props> = (props) => (
           props.onSubmit(props.form());
         }}
       >
-        <label for="first_name" class="block mb-2 text-primary">
+        <label for="first_name" class="text-primary mb-2 block">
           Käyttäjänimi:
         </label>
         <input
@@ -42,11 +42,11 @@ const Login: Component<Props> = (props) => (
           }
         />
         {props.error().username && (
-          <div class="text-red-500 text-sm">{props.error().username}</div>
+          <div class="text-sm text-red-500">{props.error().username}</div>
         )}
       </div>
       <div>
-        <label for="first_name" class="block mb-2 text-primary">
+        <label for="first_name" class="text-primary mb-2 block">
           Salasana
         </label>
         <input
@@ -63,11 +63,11 @@ const Login: Component<Props> = (props) => (
           }
         />
         {props.error().password && (
-          <div class="text-red-500 text-sm">{props.error().password}</div>
+          <div class="text-sm text-red-500">{props.error().password}</div>
         )}
       </div>
       {props.error().general && (
-        <div class="text-red-500 text-sm">{props.error().general}</div>
+        <div class="text-sm text-red-500">{props.error().general}</div>
       )}
     </div>
     <div class="w-full space-y-4">

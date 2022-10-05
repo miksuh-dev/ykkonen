@@ -8,18 +8,18 @@ const Navbar: Component = () => {
   const [menuOpen, setMenuOpen] = createSignal(false);
 
   return (
-    <nav class="absolute top-0 left-0 right-0 bg-neutral-900 border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-900">
-      <div class="container flex flex-wrap justify-between items-center mx-auto">
+    <nav class="absolute top-0 left-0 right-0 rounded border-gray-200 bg-neutral-900 px-2 py-2.5 dark:bg-gray-900 sm:px-4">
+      <div class="container mx-auto flex flex-wrap items-center justify-between">
         <Link
           href="/"
-          class="self-center text-xl font-semibold whitespace-nowrap text-white"
+          class="self-center whitespace-nowrap text-xl font-semibold text-white"
         >
           Ykkönen
         </Link>
         <div class="flex items-center md:order-2">
           <button
             type="button"
-            class="flex mr-3 text-sm bg-custom-aqua-900 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+            class="mr-3 flex rounded-full bg-custom-aqua-900 text-sm focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 md:mr-0"
             id="user-menu-button"
             aria-expanded="false"
             data-dropdown-toggle="user-dropdown"
@@ -27,9 +27,9 @@ const Navbar: Component = () => {
             onClick={() => setMenuOpen(!menuOpen())}
           >
             <span class="sr-only">Open user menu</span>
-            <div class="w-8 h-8 rounded-full">
+            <div class="h-8 w-8 rounded-full">
               <div class="avatar online placeholder">
-                <span class="text-xl bold text-white">
+                <span class="bold text-xl text-white">
                   {auth.user()?.username.substring(0, 2) ?? ""}
                 </span>
               </div>
@@ -38,7 +38,7 @@ const Navbar: Component = () => {
           <Show when={menuOpen()}>
             <div class="relative">
               <div
-                class="w-[150px] absolute right-0 top-4 z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
+                class="absolute right-0 top-4 z-50 my-4 w-[150px] list-none divide-y divide-gray-100 rounded bg-white text-base shadow dark:divide-gray-600 dark:bg-gray-700"
                 id="user-dropdown"
               >
                 <div class="py-3 px-4">
@@ -53,7 +53,7 @@ const Navbar: Component = () => {
                   <li>
                     <button
                       onClick={() => auth.action.logout()}
-                      class="w-full text-left block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                      class="block w-full py-2 px-4 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
                     >
                       Kirjaudu ulos
                     </button>

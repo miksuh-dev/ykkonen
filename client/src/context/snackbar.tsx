@@ -36,10 +36,10 @@ export const SnackbarProvider: Component<{
     <SnackbarContext.Provider value={{ show, hide }}>
       {props.children}
       <Show when={snackbar()}>
-        <div class="absolute bottom-2 flex justify-center w-full">
+        <div class="absolute bottom-2 flex w-full justify-center">
           <div
             id="alert-1"
-            class="flex p-4 mb-4 bg-neutral-100 rounded-lg"
+            class="mb-4 flex rounded-lg bg-neutral-100 p-4"
             role="alert"
           >
             <div class="ml-3 text-sm font-medium text-neutral-700">
@@ -47,14 +47,14 @@ export const SnackbarProvider: Component<{
             </div>
             <button
               type="button"
-              class="ml-auto -mx-1.5 -my-1.5 bg-neutral-100 text-neutral-500 rounded-lg focus:ring-2 focus:ring-neutral-400 p-1.5 hover:bg-neutral-200 inline-flex h-8 w-8"
+              class="-mx-1.5 -my-1.5 ml-auto inline-flex h-8 w-8 rounded-lg bg-neutral-100 p-1.5 text-neutral-500 hover:bg-neutral-200 focus:ring-2 focus:ring-neutral-400"
               data-dismiss-target="#alert-1"
               aria-label="Close"
               onClick={() => hide()}
             >
               <svg
                 aria-hidden="true"
-                class="w-5 h-5"
+                class="h-5 w-5"
                 fill="currentColor"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"

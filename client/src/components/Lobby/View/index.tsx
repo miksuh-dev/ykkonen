@@ -30,7 +30,7 @@ const LobbyViewComponent: Component = () => {
   };
 
   return (
-    <div class="block space-y-4 w-full lg:w-[1000px]">
+    <div class="block w-full space-y-4 lg:w-[1000px]">
       <div class="flex flex-row space-x-4">
         <div class="flex-1 bg-white">
           <Players players={routeData.lobby()?.players || []} />

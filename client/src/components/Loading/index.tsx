@@ -2,9 +2,9 @@ import type { Component } from "solid-js";
 
 const Loading: Component = () => {
   return (
-    <div class="h-full flex justify-center items-center">
+    <div class="flex h-full items-center justify-center">
       <svg
-        class="inline mr-2 w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-custom-aqua-700"
+        class="mr-2 inline h-16 w-16 animate-spin fill-custom-aqua-700 text-gray-200 dark:text-gray-600"
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"

@@ -3,7 +3,7 @@ import Login from "components/Form/Login";
 
 const LoginView: Component = () => {
   return (
-    <div class="h-full flex justify-center items-center">
+    <div class="flex h-full items-center justify-center">
       <Login />
     </div>
   );

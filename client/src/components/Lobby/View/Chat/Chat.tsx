@@ -13,8 +13,8 @@ type Props = {
 
 const LobbyChat: Component<Props> = (props) => {
   return (
-    <div class="flex bg-white p-2 flex-col h-full">
-      <div class="flex-1 overflow-y-auto min-h-[500px] max-h-[500px]">
+    <div class="flex h-full flex-col bg-white p-2">
+      <div class="max-h-[500px] min-h-[500px] flex-1 overflow-y-auto">
         <Show
           when={props.messages().length}
           fallback={
@@ -39,19 +39,19 @@ const LobbyChat: Component<Props> = (props) => {
         <input
           id="chat"
           type="text"
-          class="block p-2.5 mx-2 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          class="mx-2 block w-full rounded-lg border border-gray-300 bg-white p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
           placeholder="Your message..."
           onChange={(e) => props.onChange(e.currentTarget.value)}
           value={props.currentMessage()}
         />
         <button
           type="submit"
-          class="inline-flex justify-center  p-2 text-blue-600 rounded-full cursor-pointer hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
+          class="inline-flex cursor-pointer  justify-center rounded-full p-2 text-blue-600 hover:bg-blue-100 dark:text-blue-500 dark:hover:bg-gray-600"
           onClick={() => props.onSubmit(props.currentMessage())}
         >
           <svg
             aria-hidden="true"
-            class="w-6 h-6 rotate-90 fill-custom-aqua-700 before"
+            class="before h-6 w-6 rotate-90 fill-custom-aqua-700"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
           >

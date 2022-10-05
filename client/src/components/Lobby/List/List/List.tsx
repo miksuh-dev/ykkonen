@@ -20,30 +20,30 @@ const ListLobby: Component<Props> = (props) => (
     <div class="overflow-x-auto shadow-md sm:rounded-lg">
       <div class="inline-block min-w-full align-middle">
         <div class="overflow-hidden ">
-          <table class="h-[500px] overflow-y-auto min-w-full block divide-y divide-gray-200 table-fixed dark:divide-gray-700">
+          <table class="block h-[500px] min-w-full table-fixed divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700">
             <thead class="sticky top-0 bg-gray-100 dark:bg-gray-700">
               <tr>
                 <th
                   scope="col"
-                  class="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                  class="py-3 px-6 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-400"
                 >
                   Huoneen nimi
                 </th>
                 <th
                   scope="col"
-                  class="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                  class="py-3 px-6 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-400"
                 >
                   Pelaajia huoneessa
                 </th>
                 <th
                   scope="col"
-                  class="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                  class="py-3 px-6 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-400"
                 >
                   Tyyppi
                 </th>
                 <th
                   scope="col"
-                  class="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                  class="py-3 px-6 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-400"
                 >
                   Tila
                 </th>
@@ -52,25 +52,25 @@ const ListLobby: Component<Props> = (props) => (
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
               <For each={props.lobbyList()}>
                 {(lobby) => (
                   <tr>
-                    <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <td class="whitespace-nowrap py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">
                       {lobby.name}
                     </td>
-                    <td class="py-4 px-6 text-sm font-medium text-gray-500 whitespace-nowrap dark:text-white">
+                    <td class="whitespace-nowrap py-4 px-6 text-sm font-medium text-gray-500 dark:text-white">
                       {lobby.players.length}
                     </td>
-                    <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <td class="whitespace-nowrap py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">
                       {lobby.gameType.name}
                     </td>
-                    <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <td class="whitespace-nowrap py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">
                       {lobby.status}
                     </td>
-                    <td class="py-4 px-6 text-sm font-medium text-right whitespace-nowrap">
+                    <td class="whitespace-nowrap py-4 px-6 text-right text-sm font-medium">
                       <button
-                        class="text-blue-600 dark:text-blue-500 hover:underline"
+                        class="text-blue-600 hover:underline dark:text-blue-500"
                         onClick={() => props.onJoin(lobby.id)}
                       >
                         Liity

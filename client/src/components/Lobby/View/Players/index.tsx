@@ -17,22 +17,22 @@ const LobbyPlayers: Component<Props> = (props) => {
       <div class="overflow-x-auto">
         <div class="inline-block min-w-full align-middle">
           <div class="overflow-hidden ">
-            <table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-700">
+            <table class="min-w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700">
               <thead class="bg-gray-100 dark:bg-gray-700">
                 <tr>
                   <th
                     scope="col"
-                    class="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase dark:text-gray-400"
+                    class="py-3 px-6 text-left text-xs font-medium uppercase tracking-wider text-gray-700 dark:text-gray-400"
                   >
                     Pelaajan nimi
                   </th>
                 </tr>
               </thead>
-              <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+              <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                 <For each={props.players}>
                   {(player) => (
                     <tr>
-                      <td class="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                      <td class="whitespace-nowrap py-4 px-6 text-sm font-medium text-gray-900 dark:text-white">
                         {player.username}
                       </td>
                     </tr>

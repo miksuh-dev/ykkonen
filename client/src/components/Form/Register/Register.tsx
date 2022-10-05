@@ -15,7 +15,7 @@ const Register: Component<Props> = (props) => (
   <form class="block space-y-6" onSubmit={(e) => e.preventDefault()}>
     <div class="flex flex-col space-y-4">
       <div>
-        <label for="username" class="block mb-2 text-primary">
+        <label for="username" class="text-primary mb-2 block">
           Käyttäjänimi:
         </label>
         <input
@@ -33,7 +33,7 @@ const Register: Component<Props> = (props) => (
         <div class="text-red-500">{props.error().username}</div>
       )}
       <div>
-        <label for="password" class="block mb-2 text-primary">
+        <label for="password" class="text-primary mb-2 block">
           Salasana
         </label>
         <input
@@ -51,7 +51,7 @@ const Register: Component<Props> = (props) => (
         )}
       </div>
       <div>
-        <label for="passwordAgain" class="block mb-2 text-primary">
+        <label for="passwordAgain" class="text-primary mb-2 block">
           Salasana uudelleen
         </label>
         <input
