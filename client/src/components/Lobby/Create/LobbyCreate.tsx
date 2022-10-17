@@ -8,7 +8,7 @@ import { RouteData } from "./index";
 
 type Props = {
   form: Accessor<LobbyCreateInput>;
-  types: RouteData[0];
+  types: RouteData["types"];
   onChange: Setter<LobbyCreateInput>;
   error: Accessor<FormErrors>;
   onSubmit: (data: LobbyCreateInput) => void;

@@ -15,7 +15,7 @@ export type RouteData = ReturnType<typeof data>;
 
 const LobbyCreateComponent: Component = () => {
   const navigate = useNavigate();
-  const [types] = useRouteData<RouteData>();
+  const { types } = useRouteData<RouteData>();
 
   const [form, setForm] = createSignal<LobbyCreateInput>({
     name: "",

@@ -6,6 +6,7 @@ import useAuth from "hooks/useAuth";
 
 import lobbyViewData from "view/Lobby/View/data";
 import lobbyListData from "view/Lobby/List/data";
+import lobbyCreateData from "view/Lobby/Create/data";
 
 const Loading = lazy(() => import("components/Loading"));
 const Login = lazy(() => import("view/Login"));
@@ -42,7 +43,11 @@ const App: Component = () => {
           >
             <Route path="/lobby">
               <Route path="list" component={LobbyList} data={lobbyListData} />
-              <Route path="create" component={LobbyCreate} />
+              <Route
+                path="create"
+                component={LobbyCreate}
+                data={lobbyCreateData}
+              />
               <ErrorBoundary
                 fallback={(err) => {
                   console.log("err", err);
