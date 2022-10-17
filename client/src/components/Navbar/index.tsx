@@ -8,7 +8,7 @@ const Navbar: Component = () => {
   const [menuOpen, setMenuOpen] = createSignal(false);
 
   return (
-    <nav class="absolute top-0 left-0 right-0 rounded border-gray-200 bg-neutral-900 px-2 py-2.5 dark:bg-gray-900 sm:px-4">
+    <nav class=" rounded border-gray-200 bg-neutral-900 px-2 py-2.5 dark:bg-gray-900 sm:px-4">
       <div class="container mx-auto flex flex-wrap items-center justify-between">
         <Link
           href="/"

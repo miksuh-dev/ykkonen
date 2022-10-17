@@ -14,7 +14,7 @@ const LobbyViewComponent: Component = () => {
   const routeData = useRouteData<RouteData>();
   const params = useParams();
 
-  const onLobbyLeave = async () => {
+  const handleLobbyLeave = async () => {
     try {
       const lobbyId = Number(params.id);
       if (lobbyId) {
@@ -26,6 +26,19 @@ const LobbyViewComponent: Component = () => {
       }
     } finally {
       navigate("/lobby/list");
+    }
+  };
+
+  const handleLobbyStart = async () => {
+    try {
+      const lobbyId = Number(params.id);
+      if (lobbyId) {
+        await trpcClient.lobby.start.mutate({ lobbyId });
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        snackbar.error(err.message);
+      }
     }
   };
 
@@ -41,11 +54,13 @@ const LobbyViewComponent: Component = () => {
       </div>
       <div class="flex flex-row space-x-2">
         <div class="flex-1">
-          <button class="btn-primary" onClick={onLobbyLeave}>
+          <button class="btn-primary" onClick={handleLobbyLeave}>
             Poistu
           </button>
         </div>
-        <button class="btn-primary">Aloita</button>
+        <button class="btn-primary" onClick={handleLobbyStart}>
+          Aloita
+        </button>
       </div>
     </div>
   );

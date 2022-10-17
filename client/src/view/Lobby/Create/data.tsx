@@ -3,12 +3,12 @@ import { createResource } from "solid-js";
 import trpcClient from "trpc";
 
 function LobbyCreateData() {
-  const resource = createResource<GameType[]>(
+  const [types] = createResource<GameType[]>(
     () => trpcClient.lobby.types.query(),
     { initialValue: [] }
   );
 
-  return resource;
+  return { types };
 }
 
 export default LobbyCreateData;

@@ -8,6 +8,7 @@ export const getLobby = (lobbyId: number) => {
       name: true,
       gameType: true,
       status: true,
+      password: true,
       owner: {
         select: {
           id: true,

@@ -2,3 +2,4 @@ node_modules
 dist
 .env
 game-storage.db
+game-storage.db-journal

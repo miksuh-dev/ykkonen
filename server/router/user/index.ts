@@ -19,7 +19,7 @@ export const userRouter = t.router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.prisma.user.findUnique({
+      const user = await ctx.prisma.user.findFirst({
         where: {
           username: input.username,
         },

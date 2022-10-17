@@ -20,7 +20,7 @@ const ListLobby: Component<Props> = (props) => (
     <div class="overflow-x-auto shadow-md sm:rounded-lg">
       <div class="inline-block min-w-full align-middle">
         <div class="overflow-hidden ">
-          <table class="block h-[500px] min-w-full table-fixed divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700">
+          <table class="block h-[500px] min-w-full table-fixed divide-y divide-gray-200 overflow-y-auto bg-white dark:divide-gray-700">
             <thead class="sticky top-0 bg-gray-100 dark:bg-gray-700">
               <tr>
                 <th

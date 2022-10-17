@@ -7,7 +7,7 @@ const Content: Component<{ title: string; children: JSX.Element }> = (
 ) => (
   <div class="h-full">
     <Navbar />
-    <div class="flex h-full items-center justify-center ">
+    <div class="flex items-center justify-center ">
       <div class="flex flex-col space-y-8 p-4">
         <h1 class="text-center text-4xl font-bold text-white">{props.title}</h1>
         <div class="w-full">{props.children}</div>

@@ -1,4 +1,3 @@
-import /* GameType, */ "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { observable } from "@trpc/server/observable";
 import { z } from "zod";
@@ -8,12 +7,7 @@ import { authedProcedure } from "../utils";
 import { getLobby, getLobbies } from "./query";
 import * as lobbyState from "./state";
 import { GameStateLobby, Message } from "./state";
-
-enum GameStatus {
-  WAITING = "waiting",
-  STARTED = "started",
-  ENDED = "ended",
-}
+import { GameStatus } from "./types";
 
 export const lobbyRouter = t.router({
   list: authedProcedure.query(async () => {
@@ -22,8 +16,7 @@ export const lobbyRouter = t.router({
     return lobbies.map((lobby) => lobbyState.extend(lobby, ["players"]));
   }),
   types: authedProcedure.query(async ({ ctx }) => {
-    const asd = await ctx.prisma.gameType.findMany({});
-    return asd;
+    return ctx.prisma.gameType.findMany({});
   }),
   get: authedProcedure
     .input(
@@ -32,17 +25,26 @@ export const lobbyRouter = t.router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const userId = ctx.user.id;
+      const { user } = ctx;
 
       const lobby = await getLobby(input.id);
 
       const lobbyWithState = lobbyState.extend(lobby, ["players"]);
 
-      if (!lobbyState.hasPlayer(input.id, userId)) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "You are not in this lobby",
-        });
+      if (!lobbyState.hasPlayer(input.id, user.id)) {
+        if (lobby.password) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message: "You are not in this lobby",
+          });
+        }
+
+        const updatedPlayer = lobbyState.addPlayer(input.id, user);
+
+        return {
+          ...lobbyWithState,
+          ...updatedPlayer,
+        };
       }
 
       return lobbyWithState;
@@ -156,6 +158,36 @@ export const lobbyRouter = t.router({
       ee.emit("onListUpdate", { lobbyId, players });
 
       return { lobbyId };
+    }),
+  start: authedProcedure
+    .input(z.object({ lobbyId: z.number().min(1) }))
+    .mutation(async ({ input, ctx }) => {
+      const lobby = await ctx.prisma.lobby.findFirstOrThrow({
+        where: { id: input.lobbyId },
+      });
+
+      if (lobby.ownerId !== ctx.user.id) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not the owner of this lobby",
+        });
+      }
+
+      if (lobby.status !== GameStatus.WAITING) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Lobby is not in waiting state",
+        });
+      }
+
+      return ctx.prisma.lobby.update({
+        where: {
+          id: input.lobbyId,
+        },
+        data: {
+          status: GameStatus.STARTED,
+        },
+      });
     }),
   message: authedProcedure
     .input(
