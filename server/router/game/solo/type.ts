@@ -1,4 +1,4 @@
-import { CardColor, CardType, CardAction, CardNumber } from "../../enum/card";
+import { CardColor, CardType, CardAction, CardNumber } from "./enum";
 
 interface BaseCard {
   type: CardType;

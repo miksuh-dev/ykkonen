@@ -1,11 +1,5 @@
-import { CardType, CardAction, CardColor, CardNumber } from "../../enum/card";
-import {
-  Card,
-  NumberCard,
-  ActionCard,
-  WildCard,
-  SpinnerCard,
-} from "../../type/card";
+import { CardType, CardAction, CardColor, CardNumber } from "./enum";
+import { Card, NumberCard, ActionCard, WildCard, SpinnerCard } from "./type";
 
 const normalColors = [
   CardColor.RED,

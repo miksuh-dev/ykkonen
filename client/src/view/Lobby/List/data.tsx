@@ -22,7 +22,7 @@ function LobbyData() {
           }
 
           return prev.map((lobby) => {
-            if (lobby.id === updatedLobby.lobbyId) {
+            if (lobby.id === updatedLobby.id) {
               return { ...lobby, ...updatedLobby };
             }
             return lobby;

@@ -1,6 +1,8 @@
 import { TRPCError } from "@trpc/server";
+import { GameType } from "../../type/app";
 import { Player } from "../../type/prisma";
-import { Lobby } from "./query";
+import { createGame } from "../game/utils";
+import { GameStatus } from "./types";
 
 export interface Message {
   id: string;
@@ -10,92 +12,165 @@ export interface Message {
   lobbyId: number;
 }
 
-// Server state
-interface GameStateInternal {
-  lobbyId: number;
+interface LobbyStateInternalBase {
+  id: number;
+  name: string;
   players: Map<number, Player>;
+  ownerId: number;
+  status: GameStatus;
+  gameType: GameType;
+  game: ReturnType<typeof createGame> | undefined;
   messages: Message[];
+  password?: string;
+}
+
+// Server state
+export type LobbyStateInternal = LobbyStateInternalBase & {
+  hasPlayer: (playerId: number) => boolean;
+  convert: () => LobbyState;
+  addPlayer: (player: Player) => LobbyStateInternal;
+  removePlayer: (playerId: number) => LobbyStateInternal;
+  addMessage: (message: Message) => Message;
+  startGame: () => LobbyStateInternal;
+  endGame: () => LobbyStateInternal;
+};
+
+export interface PlayerStateInternal {
+  playerId: number;
+  lobbyId: number;
 }
 
 // State that is passed to client
-export type GameStateLobby = Omit<GameStateInternal, "players"> & {
+export type LobbyState = Omit<LobbyStateInternalBase, "players" | "game"> & {
   players: Player[];
 };
 
-const stateLobby = new Map<number, GameStateInternal>();
+const lobbyState = new Map<number, LobbyStateInternal>();
+const playerState = new Map<number, PlayerStateInternal>();
 
-const initializeLobby = (lobbyId: number): GameStateInternal => ({
-  lobbyId,
-  players: new Map<number, Player>(),
-  messages: [],
-});
+export const getLobbyFromPlayer = (
+  playerId: number
+): LobbyStateInternal | undefined => {
+  const player = playerState.get(playerId);
 
-const convert = (lobby: GameStateInternal): GameStateLobby => {
-  return {
-    ...lobby,
-    players: Array.from(lobby.players.values()),
-  };
+  if (!player) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Player not found",
+    });
+  }
+
+  return getLobby(player.lobbyId);
 };
 
-// Internal
-const getLobby = (lobbyId: number): GameStateLobby => {
-  const lobby = stateLobby.get(lobbyId) ?? initializeLobby(lobbyId);
+export const createLobby = ({
+  name,
+  gameType,
+  ownerId,
+}: {
+  name: string;
+  gameType: GameType;
+  ownerId: number;
+}): LobbyStateInternal => {
+  const newLobby = {
+    id: lobbyState.size + 1,
+    name,
+    players: new Map<number, Player>(),
+    messages: new Array<Message>(),
+    ownerId: ownerId,
+    status: GameStatus.WAITING,
+    game: undefined,
+    gameType,
+    hasPlayer: function (playerId: number) {
+      return this.players.has(playerId);
+    },
+    convert: function (): LobbyState {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { game, ...rest } = this;
 
-  return convert(lobby);
+      return {
+        ...rest,
+        players: Array.from(this.players.values()),
+      };
+    },
+    addPlayer: function (player: Player) {
+      this.players.set(player.id, player);
+
+      playerState.set(player.id, {
+        playerId: player.id,
+        lobbyId: this.id,
+      });
+
+      return this;
+    },
+    removePlayer: function (playerId: number) {
+      this.players.delete(playerId);
+
+      playerState.delete(playerId);
+
+      return this;
+    },
+    addMessage: function (message: Message) {
+      this.messages.push(message);
+
+      return message;
+    },
+    startGame: function () {
+      this.status = GameStatus.STARTED;
+      this.game = createGame(this);
+
+      return this;
+    },
+    endGame: function () {
+      this.status = GameStatus.ENDED;
+
+      return this;
+    },
+  } as LobbyStateInternal;
+
+  lobbyState.set(newLobby.id, newLobby);
+
+  return newLobby;
 };
 
-const getLobbySelectedKeys = <Key extends keyof GameStateLobby>(
-  lobby: GameStateLobby,
+// client
+const getLobby = (lobbyId: number): LobbyStateInternal => {
+  const lobby = lobbyState.get(lobbyId);
+
+  if (!lobby) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Lobby not found",
+    });
+  }
+
+  return lobby;
+};
+
+const getLobbySelectedKeys = <Key extends keyof LobbyStateInternal>(
+  lobby: LobbyStateInternal,
   keys: Key[]
 ) => {
   Object.keys(lobby).map((key) => {
-    lobby[key as keyof GameStateLobby];
+    lobby[key as keyof LobbyState];
   });
 
   return keys.reduce((acc, curr) => {
     acc[curr] = lobby[curr];
     return acc;
     // eslint-disable-next-line @typescript-eslint/prefer-reduce-type-parameter
-  }, {} as Pick<GameStateLobby, Key>);
-};
-
-// Wrapper to make sure taht at least initial state is returned
-const getOrCreate = (lobbyId: number) => {
-  if (!stateLobby.has(lobbyId)) {
-    stateLobby.set(lobbyId, initializeLobby(lobbyId));
-  }
-
-  // TODO: Find better way to set GameStateLobby as not undefined
-  const lobby = stateLobby.get(lobbyId);
-  if (!lobby) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Lobby not found" });
-  }
-
-  return lobby;
-};
-
-export const addMessage = (lobbyId: number, message: Message): Message => {
-  const lobby = getOrCreate(lobbyId);
-
-  lobby.messages.push(message);
-
-  return message;
+  }, {} as Pick<LobbyStateInternal, Key>);
 };
 
 export const exists = (lobbyId: number) => {
-  return stateLobby.has(lobbyId);
+  return lobbyState.has(lobbyId);
 };
 
 export const get = (
   lobbyId: number,
-  keys?: (keyof GameStateLobby)[]
-): GameStateLobby | undefined => {
-  const lobbyState = stateLobby.get(lobbyId);
-  const lobby = lobbyState ? convert(lobbyState) : undefined;
-
-  if (!lobby) {
-    return undefined;
-  }
+  keys?: (keyof LobbyStateInternal)[]
+): LobbyStateInternal => {
+  const lobby = getLobby(lobbyId);
 
   if (keys) {
     return getLobbySelectedKeys(lobby, keys);
@@ -105,54 +180,6 @@ export const get = (
   return lobby;
 };
 
-// Extends db lobby to state lobby (creates new one if doesn't exist)
-export const extend = (lobby: Lobby, keys?: (keyof GameStateLobby)[]) => {
-  const lobbyState = convert(
-    stateLobby.get(lobby.id) ?? initializeLobby(lobby.id)
-  );
-
-  if (keys) {
-    return {
-      ...lobby,
-      ...getLobbySelectedKeys(lobbyState, keys),
-    };
-  }
-
-  // If keys are not provided, return all
-  return {
-    ...lobby,
-    ...lobbyState,
-  };
-};
-
-export const hasPlayer = (lobbyId: number, playerId: number) => {
-  const lobby = stateLobby.get(lobbyId);
-  if (!lobby) return false;
-
-  return lobby.players.has(playerId);
-};
-
-export const addPlayer = (lobbyId: number, player: Player) => {
-  // Create lobbystate when first player joins
-  const lobby = getOrCreate(lobbyId);
-
-  if (!lobby.players.has(player.id)) {
-    lobby.players.set(player.id, player);
-  }
-
-  return getLobby(lobbyId).players;
-};
-
-export const removePlayer = (lobbyId: number, playerId: number) => {
-  const lobby = stateLobby.get(lobbyId);
-
-  if (!lobby) {
-    throw new TRPCError({ code: "BAD_REQUEST", message: "Lobby not found" });
-  }
-
-  if (lobby.players.has(playerId)) {
-    lobby.players.delete(playerId);
-  }
-
-  return getLobby(lobbyId).players;
+export const getLobbies = () => {
+  return Array.from(lobbyState.values());
 };

@@ -9,7 +9,7 @@ function LobbyData({ params, navigate }: RouteDataFuncArgs) {
 
   const [lobby, { mutate }] = createResource<LobbyInside>(() =>
     trpcClient.lobby.get.query({
-      id: Number(params.id),
+      lobbyId: Number(params.id),
     })
   );
 

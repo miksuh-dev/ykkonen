@@ -1,11 +1,11 @@
 import { t } from "../../../trpc";
-import { authedProcedure } from "../../utils";
+import { gameProceduce } from "../../utils";
 
 export const soloRouter = t.router({
-  state: authedProcedure.query(({ ctx }) => {
-    const { user } = ctx;
+  state: gameProceduce.query(({ ctx }) => {
+    const { game } = ctx;
 
-    return user;
+    return game.convert();
   }),
 });
 

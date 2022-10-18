@@ -3,51 +3,37 @@ import { observable } from "@trpc/server/observable";
 import { z } from "zod";
 import ee from "../../eventEmitter";
 import { t } from "../../trpc";
+import { GameTypes } from "../../type/app";
 import { authedProcedure } from "../utils";
-import { getLobby, getLobbies } from "./query";
 import * as lobbyState from "./state";
-import { GameStateLobby, Message } from "./state";
+import { LobbyState, Message } from "./state";
 import { GameStatus } from "./types";
 
 export const lobbyRouter = t.router({
-  list: authedProcedure.query(async () => {
-    const lobbies = await getLobbies();
-
-    return lobbies.map((lobby) => lobbyState.extend(lobby, ["players"]));
+  list: authedProcedure.query(() => {
+    return lobbyState.getLobbies().map((lobby) => lobby.convert());
   }),
-  types: authedProcedure.query(async ({ ctx }) => {
-    return ctx.prisma.gameType.findMany({});
+  types: authedProcedure.query(() => {
+    return GameTypes;
   }),
   get: authedProcedure
     .input(
       z.object({
-        id: z.number().min(1),
+        lobbyId: z.number().min(1),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .query(({ ctx, input }) => {
       const { user } = ctx;
 
-      const lobby = await getLobby(input.id);
+      const lobby = lobbyState.get(input.lobbyId);
 
-      const lobbyWithState = lobbyState.extend(lobby, ["players"]);
-
-      if (!lobbyState.hasPlayer(input.id, user.id)) {
-        if (lobby.password) {
-          throw new TRPCError({
-            code: "UNAUTHORIZED",
-            message: "You are not in this lobby",
-          });
-        }
-
-        const updatedPlayer = lobbyState.addPlayer(input.id, user);
-
-        return {
-          ...lobbyWithState,
-          ...updatedPlayer,
-        };
+      if (!lobby.hasPlayer(user.id)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Player not in lobby",
+        });
       }
-
-      return lobbyWithState;
+      return lobby.convert();
     }),
   create: authedProcedure
     .input(
@@ -56,48 +42,29 @@ export const lobbyRouter = t.router({
         type: z.number().min(1),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(({ ctx, input }) => {
       const { user } = ctx;
 
-      const lobbyType = await ctx.prisma.gameType.findUnique({
-        where: {
-          id: input.type,
-        },
-      });
-
-      if (!lobbyType) {
+      const gameType = GameTypes.find((type) => type.id === input.type);
+      if (!gameType) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Invalid game type",
         });
       }
 
-      const lobby = await ctx.prisma.lobby.create({
-        data: {
+      const lobby = lobbyState
+        .createLobby({
+          gameType,
           name: input.name,
           ownerId: ctx.user.id,
-          status: GameStatus.WAITING,
-          gameTypeId: input.type,
-        },
-        select: {
-          id: true,
-          name: true,
-          gameType: true,
-          status: true,
-          owner: {
-            select: {
-              id: true,
-              username: true,
-            },
-          },
-        },
-      });
-
-      lobbyState.addPlayer(lobby.id, user);
+        })
+        .addPlayer(user)
+        .convert();
 
       ee.emit("onListUpdate", lobby);
 
-      return lobbyState.extend(lobby, ["players"]);
+      return lobby;
     }),
   join: authedProcedure
     .input(
@@ -105,32 +72,23 @@ export const lobbyRouter = t.router({
         lobbyId: z.number(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(({ ctx, input }) => {
       const { lobbyId } = input;
       const { user } = ctx;
 
-      const lobby = await ctx.prisma.lobby.findUnique({
-        where: {
-          id: lobbyId,
-        },
-      });
+      const lobby = lobbyState.get(lobbyId);
 
-      if (!lobby) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Invalid lobby",
+      if (!lobby.hasPlayer(user.id)) {
+        const updatedLobby = lobby.addPlayer(user);
+
+        ee.emit(`onUpdate-${lobbyId}`, {
+          lobbyId,
+          players: updatedLobby.convert().players,
         });
-      }
-
-      if (!lobbyState.hasPlayer(lobby.id, user.id)) {
-        // throw new TRPCError({
-        //   code: "BAD_REQUEST",
-        //   message: "You are already in this lobby",
-        // });
-        const players = lobbyState.addPlayer(lobby.id, user);
-
-        ee.emit(`onUpdate-${lobby.id}`, { lobbyId, players });
-        ee.emit("onListUpdate", { lobbyId, players });
+        ee.emit("onListUpdate", {
+          lobbyId,
+          players: updatedLobby.convert().players,
+        });
       }
 
       return { lobbyId };
@@ -145,28 +103,31 @@ export const lobbyRouter = t.router({
       const { lobbyId } = input;
       const { user } = ctx;
 
-      if (!lobbyState.hasPlayer(lobbyId, user.id)) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "You are not in this lobby",
+      const lobby = lobbyState.get(lobbyId);
+
+      if (lobby.hasPlayer(user.id)) {
+        const updatedLobby = lobby.removePlayer(user.id);
+
+        ee.emit(`onUpdate-${lobbyId}`, {
+          lobbyId,
+          players: updatedLobby.convert().players,
+        });
+        ee.emit("onListUpdate", {
+          lobbyId,
+          players: updatedLobby.convert().players,
         });
       }
-
-      const players = lobbyState.removePlayer(lobbyId, user.id);
-
-      ee.emit(`onUpdate-${lobbyId}`, { lobbyId, players });
-      ee.emit("onListUpdate", { lobbyId, players });
 
       return { lobbyId };
     }),
   start: authedProcedure
     .input(z.object({ lobbyId: z.number().min(1) }))
-    .mutation(async ({ input, ctx }) => {
-      const lobby = await ctx.prisma.lobby.findFirstOrThrow({
-        where: { id: input.lobbyId },
-      });
+    .mutation(({ input, ctx }) => {
+      const { user } = ctx;
 
-      if (lobby.ownerId !== ctx.user.id) {
+      const lobby = lobbyState.get(input.lobbyId);
+
+      if (lobby.ownerId !== user.id) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not the owner of this lobby",
@@ -180,14 +141,19 @@ export const lobbyRouter = t.router({
         });
       }
 
-      return ctx.prisma.lobby.update({
-        where: {
-          id: input.lobbyId,
-        },
-        data: {
-          status: GameStatus.STARTED,
-        },
+      const updatedLobby = lobby.startGame();
+
+      ee.emit(`onUpdate-${lobby.id}`, {
+        lobbyId: updatedLobby.id,
+        status: updatedLobby.status,
       });
+
+      ee.emit("onListUpdate", {
+        lobbyId: updatedLobby.id,
+        status: updatedLobby.status,
+      });
+
+      return updatedLobby.convert();
     }),
   message: authedProcedure
     .input(
@@ -201,21 +167,15 @@ export const lobbyRouter = t.router({
       const { user } = ctx;
 
       const lobby = lobbyState.get(lobbyId);
-      if (!lobby) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Lobby not found",
-        });
-      }
 
-      if (!lobbyState.hasPlayer(lobbyId, user.id)) {
+      if (!lobby.hasPlayer(user.id)) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "You are not in this lobby",
         });
       }
 
-      const message = lobbyState.addMessage(lobbyId, {
+      const message = lobby.addMessage({
         id: Date.now().toString(),
         username: user.username,
         content: input.content,
@@ -234,15 +194,19 @@ export const lobbyRouter = t.router({
       })
     )
     .subscription(({ input, ctx }) => {
-      if (!lobbyState.hasPlayer(input.lobbyId, ctx.user.id)) {
+      const { user } = ctx;
+      const { lobbyId } = input;
+
+      const lobby = lobbyState.get(lobbyId);
+      if (!lobby.hasPlayer(user.id)) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not in this lobby",
         });
       }
 
-      return observable<GameStateLobby>((emit) => {
-        const onUpdate = (updatedLobby: GameStateLobby) => {
+      return observable<Partial<LobbyState>>((emit) => {
+        const onUpdate = (updatedLobby: Partial<LobbyState>) => {
           emit.next(updatedLobby);
         };
 
@@ -259,7 +223,11 @@ export const lobbyRouter = t.router({
       })
     )
     .subscription(({ input, ctx }) => {
-      if (!lobbyState.hasPlayer(input.lobbyId, ctx.user.id)) {
+      const { user } = ctx;
+      const { lobbyId } = input;
+
+      const lobby = lobbyState.get(lobbyId);
+      if (!lobby.hasPlayer(user.id)) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "You are not in this lobby",
@@ -278,8 +246,8 @@ export const lobbyRouter = t.router({
       });
     }),
   onListUpdate: authedProcedure.subscription(() => {
-    return observable<GameStateLobby>((emit) => {
-      const onListUpdate = (lobby: GameStateLobby) => {
+    return observable<Partial<LobbyState>>((emit) => {
+      const onListUpdate = (lobby: Partial<LobbyState>) => {
         // emit data to client
         emit.next(lobby);
       };
