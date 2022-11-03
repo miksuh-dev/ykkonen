@@ -1,3 +1,0 @@
-// export createCard = (card: Card) => {
-//
-// }

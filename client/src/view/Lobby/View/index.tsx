@@ -4,7 +4,7 @@ import Content from "components/Content";
 import data from "view/Lobby/View/data";
 import { useRouteData } from "@solidjs/router";
 
-const Solo = lazy(() => import("components/Game/Solo"));
+const Solo = lazy(() => import("game/Solo"));
 
 export type RouteData = ReturnType<typeof data>;
 

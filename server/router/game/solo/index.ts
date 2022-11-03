@@ -5,7 +5,7 @@ export const soloRouter = t.router({
   state: gameProceduce.query(({ ctx }) => {
     const { game } = ctx;
 
-    return game.convert();
+    return game.convert(ctx.user.id);
   }),
 });
 

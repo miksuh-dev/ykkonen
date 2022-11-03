@@ -28,7 +28,7 @@ export interface SoloGameStateInternalBase {
 }
 
 export type SoloGameStateInternal = SoloGameStateInternalBase & {
-  convert: () => SoloGameState;
+  convert: (playerId: number) => SoloGameState;
 };
 
 // State that is passed to client
@@ -39,6 +39,7 @@ export type SoloGameState = Omit<
   players: SoloPlayer[];
   deckCount: number;
   discardCount: number;
+  hand: Card[];
 };
 
 export const createGame = (
@@ -63,7 +64,7 @@ export const createGame = (
     discard,
     currentPlayer,
     direction,
-    convert: function () {
+    convert: function (playerId: number) {
       // eslint-disable-next-line @typescript-eslint/no-shadow, @typescript-eslint/no-unused-vars
       const { deck, ...restGame } = this;
 
@@ -80,6 +81,7 @@ export const createGame = (
         }),
         deckCount: game.deck.length,
         discardCount: game.discard.length,
+        hand: this.players.find((player) => player.id === playerId)?.hand ?? [],
       };
     },
   };

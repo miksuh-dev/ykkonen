@@ -27,7 +27,3 @@ export type GameType = inferProcedureOutput<
 export type IncomingMessage = inferObservableValue<
   inferProcedureOutput<AppRouter["lobby"]["onMessage"]>
 >;
-
-export type SoloGameState = inferProcedureOutput<
-  AppRouter["game"]["solo"]["state"]
->;
